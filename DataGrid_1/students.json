@@ -1,0 +1,133 @@
+[
+  {
+    "StudentId": 1,
+    "FirstName": "Alice",
+    "LastName": "Johnson",
+    "FatherName": null,
+    "DateOfBirth": "2004-03-15",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": true
+  },
+  {
+    "StudentId": 2,
+    "FirstName": "Brian",
+    "LastName": "Smith",
+    "FatherName": null,
+    "DateOfBirth": "2002-08-02",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": false
+  },
+  {
+    "StudentId": 3,
+    "FirstName": "Chloe",
+    "LastName": "Martinez",
+    "FatherName": null,
+    "DateOfBirth": "2003-11-28",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": true
+  },
+  {
+    "StudentId": 4,
+    "FirstName": "Daniel",
+    "LastName": "Kim",
+    "FatherName": null,
+    "DateOfBirth": "2000-05-09",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": true
+  },
+  {
+    "StudentId": 5,
+    "FirstName": "Emily",
+    "LastName": "Davis",
+    "FatherName": null,
+    "DateOfBirth": "2001-12-12",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": false
+  },
+  {
+    "StudentId": 6,
+    "FirstName": "Frank",
+    "LastName": "Nguyen",
+    "FatherName": null,
+    "DateOfBirth": "2002-01-23",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": true
+  },
+  {
+    "StudentId": 7,
+    "FirstName": "Grace",
+    "LastName": "Thompson",
+    "FatherName": null,
+    "DateOfBirth": "2003-04-30",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": true
+  },
+  {
+    "StudentId": 8,
+    "FirstName": "Henry",
+    "LastName": "Wilson",
+    "FatherName": null,
+    "DateOfBirth": "1999-09-11",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": false
+  },
+  {
+    "StudentId": 9,
+    "FirstName": "Isabella",
+    "LastName": "Lopez",
+    "FatherName": null,
+    "DateOfBirth": "2004-07-07",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": true
+  },
+  {
+    "StudentId": 10,
+    "FirstName": "Jacob",
+    "LastName": "Anderson",
+    "FatherName": null,
+    "DateOfBirth": "2003-10-25",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": true
+  },
+
+  {
+    "StudentId": 11,
+    "FirstName": "Liam",
+    "LastName": "Brown",
+    "FatherName": null,
+    "DateOfBirth": "2001-05-23",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": true
+  },
+  {
+    "StudentId": 12,
+    "FirstName": "Olivia",
+    "LastName": "Taylor",
+    "FatherName": null,
+    "DateOfBirth": "2003-12-10",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": false
+  },
+  {
+    "StudentId": 13,
+    "FirstName": "Noah",
+    "LastName": "Lopez",
+    "FatherName": null,
+    "DateOfBirth": "2002-09-05",
+    "LastActiveAt": null,
+    "AccountBalance": 0,
+    "IsActive": false
+  }
+]
