@@ -1,31 +1,24 @@
-﻿using DataGridLib.Interfaces;
+﻿using DataGrid_1.Export;
+using DataGridLib.Export;
+using DataGridLib.Export.Interfaces;
+using DataGridLib.Interfaces;
 
 namespace DataGridLib;
 
-
+//orchestrator care ia datele, aplica config( coloane, filtru, numerotare randuri) 
 public class DataGrid<T>
 {
-    //readonly ca sa le pot atribui doar in constructor , sau la initializatorul de proprietate
     private GridConfiguration<T> Configuration { get; }
     private GridDataSource<T> DataSource { get; }
 
-
+    //cel putin o coloana si fiecare un header valid 
     public DataGrid(GridConfiguration<T> Configuration, GridDataSource<T> DataSource)
     {
         this.Configuration = Configuration;
         this.DataSource = DataSource;
-
-        //validare 
         Configuration.Validate();
     }
 
-    //OVERLOAD LA METODA DE AFISARE!
-
-    //afisez toate coloanele din config
-    public void Display()
-    {
-        Display(Configuration.Columns);
-    }
 
     //overload: afisez doar coloanele a caror header le dau eu ca parametru
     public void Display(params string[] columnHeaders)
@@ -35,66 +28,83 @@ public class DataGrid<T>
 
         if (columnHeaders == null || columnHeaders.Length == 0)
         {
+            //daca nu s-au dat headere ( display() )  atunci afisez toate
             cols = Configuration.Columns;
         }
         else
         {
-            cols = Configuration.Columns
+            //daca am lista de headere, filtrez coloanele din configuratie c asa retin doar pe cele ale caror header apare 
+            cols = Configuration.Columns //iau ista completa de coloane
                 .Where(c => columnHeaders.Contains(c.Header, StringComparer.OrdinalIgnoreCase))
                 .ToList();
+            //pastrez doar cooanele ale caror headere se regasesc in columnheaders
+            //face comparatie case insesitive
 
             if (cols.Count == 0)
-                cols = Configuration.Columns; // fallback
+                cols = Configuration.Columns;
         }
 
         Display(cols);
     }
 
+    //primeste lista de coloane de afisat
     private void Display(List<IColumn<T>> cols)
     {
-        // aplica Where/OrderBy/Skip/Take apoi mapeaza la row
-        var items = Configuration.Apply(DataSource.GetData()).ToList();
-        var rows = DataSource.ToRows(cols.ToList(), items);
+        //pt fiecare item din items aplica,in ordine: pt # ia s.studentid si conv la string , si le pune intr un string[] si construieste un row
+        //row[0] = "1", "danie","yes"... 
+        List<Row> rows = DataSource.ToRows(cols, Configuration);
 
-        //calcul latimi pt coloanele 
-        var widths = new int[cols.Count];
+        //calcul latimi pt coloanele ,max dintre lungimea header ului si cea mai lunga val textuala 
+        int[] widths = new int[cols.Count];
         for (int c = 0; c < cols.Count; c++)
-            widths[c] = Math.Max(cols[c].Header.Length,
-                                 rows.Select(r => r[c].Length).DefaultIfEmpty(0).Max());
+            widths[c] = Math.Max(cols[c].Header.Length, rows.Select(r => r[c].Length).DefaultIfEmpty(0).Max());
 
-        // row count ca coloana (daca e activat)
+        //row count ca coloana (daca e activat)
+        //calculez latimea ei: maxim intre no si cel mai mare nr in caractere
         int rowNumWidth = 0;
         if (Configuration.ShowRowNumber)
-            rowNumWidth = Math.Max("No.".Length, rows.Count.ToString().Length);
+            rowNumWidth = Math.Max("#".Length, rows.Count.ToString().Length);
 
-        // header 
+        // header , pt coloana numerelor ( no.) aliniat cu  separator | 
         if (Configuration.ShowRowNumber)
-            Console.Write(Align("No.", rowNumWidth, Configuration.RowNumberAligment) + " | ");
+            Console.Write(Align("#", rowNumWidth, Configuration.RowNumberAligment) + " | ");
 
+        //afisare header coloanele,  aliniate left
         for (int c = 0; c < cols.Count; c++)
         {
             Console.Write(Align(cols[c].Header, widths[c], Alignment.Left));
-            if (c < cols.Count - 1) Console.Write(" | ");
+            if (c < cols.Count - 1)
+                Console.Write(" | ");
         }
         Console.WriteLine();
 
-        // separator
+        //separator sub header, latimea totala = suma latimi coloane + spatii dintre ele
         int totalWidth = widths.Sum() + Math.Max(0, cols.Count - 1) * 3;
-        if (Configuration.ShowRowNumber) 
+        if (Configuration.ShowRowNumber)
             totalWidth += rowNumWidth + 3; // "No." + " | "
 
         Console.WriteLine(new string('-', totalWidth));
 
-        //randuri 
+        //r merge prin toate randurile , c prin coloanele afisate
         for (int r = 0; r < rows.Count; r++)
         {
+            //daca e coloana cu nr randului, o afisez prima
+            //aliniata si cu latimea calculata
             if (Configuration.ShowRowNumber)
                 Console.Write(Align((r + 1).ToString(), rowNumWidth, Configuration.RowNumberAligment) + " | ");
+            //r+1 pt ca indexul r incepe de la 0
 
+            //parcurge coloanele si afiseaza celulele aliniate corespunzator
             for (int c = 0; c < cols.Count; c++)
             {
+                //row[r][c] - ia textul celulei 
+                //widths[c] - latimea maxima coloanei c
+                //cols[c].Alignment - alinierea specificata in coloana c
                 Console.Write(Align(rows[r][c], widths[c], cols[c].Alignment));
-                if (c < cols.Count - 1) Console.Write(" | ");
+
+                // pun | daca nu e ultima coloana
+                if (c < cols.Count - 1)
+                    Console.Write(" | ");
             }
             Console.WriteLine();
         }
@@ -102,149 +112,32 @@ public class DataGrid<T>
 
     private static string Align(string text, int width, Alignment align)
     {
-        text ??= string.Empty;
-        if (text.Length > width) return text[..width];
-        int pad = width - text.Length;
+        if (text == null)
+            text = string.Empty;
+
+        int pad = width - text.Length; //spatii de adaugat ca sa ajung la latimea width
+
         return align switch
         {
-            Alignment.Left => text + new string(' ', pad),
-            Alignment.Right => new string(' ', pad) + text,
+            Alignment.Left => text + new string(' ', pad),  //text+ spatii
+            Alignment.Right => new string(' ', pad) + text, //spatii + text
             Alignment.Center => new string(' ', pad / 2) + text + new string(' ', pad - pad / 2),
+            //impart spatiul : jumatate inainte pad/2, text, restupa dupa pad-pad/2: centrat
             _ => text
         };
     }
 
-}
-
-
-/*
- * 
- * old implementation without generics
-     public void Display()
+    public void ExportDataGrid(IGridExporter exporter, string path)
     {
-        var rows = dataSource.ToRows(configuration.Columns);
+        if (exporter == null) 
+            throw new ArgumentNullException(nameof(exporter));
 
-        var widths = new int[configuration.Columns.Count];
-        for (int c = 0; c < configuration.Columns.Count; c++)
-            widths[c] = Math.Max(configuration.Columns[c].Header.Length,
-                                 rows.Select(r => r[c].Length).DefaultIfEmpty(0).Max());
+        if (string.IsNullOrWhiteSpace(path)) 
+            throw new ArgumentException("Invalid path.", nameof(path));
 
-        //optional row number
-        int rowNumWidth = 0;
-        if( configuration.ShowRowNumber )
-        {
-            rowNumWidth = Math.Max("No".Length, rows.Count.ToString().Length);
-        }
+        var (header, row) = GridExportData.Build(Configuration, DataSource);
 
+        exporter.Export(header, row, path);
 
-        // header
-        if (configuration.ShowRowNumber)
-            Console.Write(Align("#", rowNumWidth, configuration.RowNumberAligment) + " | ");
-
-        for (int c = 0; c < configuration.Columns.Count; c++)
-        {
-            Console.Write(Align(configuration.Columns[c].Header, widths[c], Alignment.Left));
-            if (c < configuration.Columns.Count - 1) Console.Write(" | ");
-        }
-        Console.WriteLine();
-
-        // (3) SEPARATOR (include No. + " | ")
-        int totalWidth = widths.Sum() + Math.Max(0, configuration.Columns.Count - 1) * 3;
-        if (configuration.ShowRowNumber) totalWidth += rowNumWidth + 3;
-        Console.WriteLine(new string('-', totalWidth));
-
-        // (4) ROWS
-        for (int r = 0; r < rows.Count; r++)
-        {
-            if (configuration.ShowRowNumber)
-                Console.Write(Align((r + 1).ToString(), rowNumWidth, configuration.RowNumberAligment) + " | ");
-
-            for (int c = 0; c < configuration.Columns.Count; c++)
-            {
-                var col = configuration.Columns[c];
-                Console.Write(Align(rows[r][c], widths[c], col.Alignment));
-                if (c < configuration.Columns.Count - 1) Console.Write(" | ");
-            }
-            Console.WriteLine();
-        }
-    }
- */
-
-
-
-
-
-/*
-public List<Column> Columns { get; }
-public List<Row> Rows { get; }
-
-public DataGrid(List<Column> columns, List<Row> rows)
-{
-    Columns = columns;
-    Rows = rows;
-}
-
-public void AddColumn(string header, string field)
-{
-    Columns.Add(new Column(header, field));
-}
-public void AddRow(Row row)
-{
-    Rows.Add(row);
-}
-
-
-public void Display()
-{
-    var columns = Columns;
-    var rows = Rows;
-
-    //latimea fiecarei coloane
-    int[] maxWidths = new int[columns.Count];
-
-    for (int i = 0; i < columns.Count; i++)
-    {
-        maxWidths[i] = columns[i].Header.Length;
-
-        foreach (Row r in rows)
-        {
-            //trygetvalue - key - value , out tvalue value - true daca contine el cu cheia specificata
-            // r.rows.TryGetValue(columns[i].Field, out object value);
-            var value = r.GetValue(columns[i].Field);
-            string text = value?.ToString() ?? string.Empty;
-            if (text.Length > maxWidths[i])
-                maxWidths[i] = text.Length;
-            //iau valoarea asociata campului field(cheia, d eex full name) , transform in text si daca e mai lung decat header ul actual, maresc latimea 
-        }
-    }
-
-    //header
-    for (int i = 0; i < columns.Count; i++)
-    {
-        Console.Write(columns[i].Header.PadRight(maxWidths[i]) + " | ");
-    }
-    Console.WriteLine();
-    //padright - completeaza textul cu spatii pana la lungimea n 
-    //name.padright(10) -> name cu 10 spatii la dreapta 
-
-    //linie sub header
-    Console.WriteLine(new string('-', maxWidths.Sum() + (columns.Count * 3)));
-    //maxWidths - totalul caracterelor de date
-    //columns.count * 3 - spatii si barele | 
-
-
-    //fiecara rand parcurg coloanele in ordinea lor si afisez valoarea asociata ( field din column ) 
-    foreach (Row row in rows)
-    {
-        //pt fiecare rand, pt fiecare coloana iau valoarea asociala field ului din dict
-        //
-        for (int i = 0; i < columns.Count; i++)
-        {
-            var value = row.GetValue(columns[i].Field);
-            string text = value?.ToString() ?? string.Empty;
-            Console.Write(text.PadRight(maxWidths[i]) + " | ");
-        }
-        Console.WriteLine();
     }
 }
-*/

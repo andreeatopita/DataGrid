@@ -9,11 +9,8 @@ public interface IColumn<T>
 {
     string Header { get; }
     //enum pentru tipurile de date
-    GridDataType DataType { get; }
-    //enum pentru alinierea textului in coloana
     Alignment Alignment { get; }
     //metoda pentru a obtine textul care va fi afisat in celula pentru un obiect de tip T
-
 
     string GetCellText(T item);
 }

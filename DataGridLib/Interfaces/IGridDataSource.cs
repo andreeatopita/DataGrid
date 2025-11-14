@@ -2,7 +2,6 @@
 
 public interface IGridDataSource<T>
 {
-    IEnumerable<T> GetData();
-    List<Row> ToRows(List<IColumn<T>> columns);
-    List<Row> ToRows(List<IColumn<T>> columns, IEnumerable<T> items);
+    IEnumerable<T> GetData(GridConfiguration<T>? config);
+    List<Row> ToRows(List<IColumn<T>> columns, GridConfiguration<T>? configuration = null);
 }

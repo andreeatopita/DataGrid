@@ -14,52 +14,38 @@ public class Student
 
     //optional numele tatalui, poate fi null
     public string? FatherName { get; private set; } 
-
-    public DateOnly DateOfBirth { get; private set; }
-    public DateTime? LastActiveAt { get; private set; }
+    //dateonly?
+    public DateTime DateOfBirth { get; private set; }
+    public DateTime LastActiveAt { get; private set; }
     public decimal AccountBalance { get; private set; }
     public bool IsActive { get; private set; }
 
-
-    //proprietati pt afisare in format dorit
-    public string ActiveStatus => IsActive ? "Yes" : "No";
-    public string DateOfBirthFormat => DateOfBirth==default ? "N/A" : DateOfBirth.ToString("yyyy-MM-dd");
-    public string FullName => $"{FirstName} {LastName}";
-    public string AccountBalanceFormat => $"{AccountBalance:C}"; //simbol valuta 
-    public string LastActiveAtFormat => LastActiveAt.HasValue ? LastActiveAt.Value.ToString("yyyy-MM-dd HH:mm:ss") : "N/A";
-    public string FatherNameFormat => FatherName ?? "N/A";
-
-
-    //de reparat studentage
-    public string StudentAge
+    //tuple pt varsta
+    public (int Years, int Months) GetAge()
     {
-        get
-        { 
-            if(DateOfBirth==default)
-            {
-                return "N/A";
-            }
+        if (DateOfBirth == default) 
+            return (0, 0);
 
-            DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+        DateTime today = DateTime.Today;
+        int years = today.Year - DateOfBirth.Year;
+        int months = today.Month - DateOfBirth.Month;
 
-            int year = today.Year - DateOfBirth.Year;
-            int month = today.Month - DateOfBirth.Month;
+        if (today.Day < DateOfBirth.Day)
+            months--;
 
-            if(today.Day< DateOfBirth.Day)
-            {
-                month--;
-            }
-
-            if (month < 0)
-            {
-                year--;
-                month += 12;
-            }
-
-            return $"{year}y {month}m ";
+        if (months < 0)
+        {
+            years--;
+            months += 12;
         }
+        return (years, months);
     }
-    public Student(int id,string firstName, string lastName, DateOnly dateOfBirth, bool isActive, string? fatherName = null, DateTime? lastActiveAt = null, decimal accountBalance = 0)
+
+    public string FullName => $"{FirstName} {LastName}";
+
+
+    //lastactiveat: daca e 
+    public Student(int id,string firstName, string lastName, DateTime dateOfBirth, bool isActive, string? fatherName = null, DateTime lastActiveAt = default, decimal accountBalance = 0)
     {
         StudentId = id;
         FirstName = firstName;
@@ -68,12 +54,13 @@ public class Student
         IsActive = isActive;
 
         FatherName = fatherName;
-        LastActiveAt = lastActiveAt;
+        //daca lastactiveat e default, pun data curenta, altfel pun ce am primit
+        LastActiveAt = lastActiveAt== default ? DateTime.Now : lastActiveAt;
         AccountBalance = accountBalance;
+
     }
 
     public Student() :this(0,string.Empty,string.Empty,default,false) {}
-
 
     //daca vreau sa modific un student, folosesc o metoda 
     public void UpdateAccountBalance(decimal newBalance)
@@ -83,25 +70,30 @@ public class Student
 
     public void Activate()
     {
-        IsActive = true;
+        //daca e fals, il activez
+        if (IsActive == false)
+        {
+            IsActive = true;
+            LastActiveAt= DateTime.Now;
+        }
     }
 
     public void Deactivate()
     {
-        IsActive = false;
+        //daca e activat, il dezactivez, lastactiveat ramane neschimbat
+        if (IsActive == true)
+            IsActive = false;
     }
 
     public void UpdateLastActiveAt(DateTime lastActive)
     {
-        LastActiveAt = lastActive;
+        //daca e default, pun data curenta, altfel pun ce am primit
+        LastActiveAt = lastActive == default ? DateTime.Now : lastActive;
     }
 
     public void UpdateFatherName(string? fatherName)
     {
         FatherName = fatherName;
     }
-
-
-
 }
 

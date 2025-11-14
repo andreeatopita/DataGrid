@@ -7,35 +7,36 @@ using System.Threading.Tasks;
 
 namespace DataGridLib;
 
-//descriere coloane, 
+//tipul de entitate pe care il afiseaza grila: student,....
 public class GridConfiguration<T> : IGridConfiguration<T>
 {
-    //lista de coloane
     public List<IColumn<T>> Columns { get; }
     public bool ShowRowNumber { get; private set; }
     public Alignment RowNumberAligment { get; private set; }
 
-    //transformari peste IEnumerable<T>, filtre ordonari paginare , repr colectia de T
     private Func<IEnumerable<T>, IEnumerable<T>> queryModifier = items => items;
+    //filtrari, ordonari. functie de la secv la secv , fiecare metoda: where orderby skip modifica functia anterioara, lant
+    //iau o secventa de T, inotrc o secventa de T
 
 
     //filtrare cu where si predicat
-    //predicate = functie care returneaza bool, decide daca un element T trebuie inclus in rezultat
-    // pastreaza doar elementele pentru care predicatul e true
-    public GridConfiguration<T> Where(Func<T, bool> predicate)
+    //pastreaza doar elementele pentru care predicatul e true
+    public GridConfiguration<T> Where(Func<T,bool> predicate)
     {
-        //prev - pentru a pastra vechea functie, in caz ca vreau sa o folosesc
-        var prev = queryModifier;
+        //prev - pentru a pastra vechea functie, o incapsulez intr o variabila
+        //apoi creez o noua functie care aplica vechea functie si apoi filtreaza cu where
+        Func<IEnumerable<T>, IEnumerable<T>> prev = queryModifier;
         queryModifier = items => prev(items).Where(predicate);
         return this;
     }
-    //ordonare dupa o cheie 
-    public GridConfiguration<T> OrderBy<TKey>(Func<T, TKey> keySelector, bool desc = false)
+
+    //ordonare dupa o cheie aleasa, tkey - tipul cheii dupa care ordonez, adica string, int, datetime
+    public GridConfiguration<T> OrderBy<TKey>(Func<T, TKey> keySelector, bool asc = false)
     {
         // pastrez vechea functie
-        var prev = queryModifier;
+        Func<IEnumerable<T>, IEnumerable<T>> prev = queryModifier;
         //daca desc e true, ordonez descrescator, altfel crescator
-        if (desc)
+        if (asc)
         {
             queryModifier = items => prev(items).OrderByDescending(keySelector);
         }
@@ -46,12 +47,12 @@ public class GridConfiguration<T> : IGridConfiguration<T>
         return this;
     }
 
-    //pentru a putea afisa subseturi:
+
     //sare peste primele n elemente ( pt paginare)
     public GridConfiguration<T> Skip(int n)
     {
         // pastrez vechea functie
-        var prev = queryModifier;
+        Func<IEnumerable<T>, IEnumerable<T>> prev = queryModifier;
         queryModifier = items => prev(items).Skip(n);
         return this;
     }
@@ -60,42 +61,38 @@ public class GridConfiguration<T> : IGridConfiguration<T>
     public GridConfiguration<T> Take(int n)
     {
         //prev - pastrez vechea functie
-        var prev = queryModifier;
+        Func<IEnumerable<T>, IEnumerable<T>> prev = queryModifier;
         queryModifier = items => prev(items).Take(n);
         return this;
     }
 
 
-    //aplica transformarile definite in queryModifier peste sursa data
+    //aplica transformarile definite in queryModifier peste sursa data, aplica lantul peste datasource
     internal IEnumerable<T> Apply(IEnumerable<T> source) => queryModifier(source);
     //ruleaza transformarile definite in queryModifier peste sursa data
-    //internal - doar in proiectul curent, bine pentru incapsulare , nu expun in afara librariei
-    //console app foloseste data grid nu apply direct
-    //applu - executa comenzile query, returneaza rezultatul final
 
 
     public GridConfiguration()
     {
         Columns = new List<IColumn<T>>();
         ShowRowNumber = false;
-        RowNumberAligment = Alignment.Right;
+        RowNumberAligment = Alignment.Left;
     }
 
     //rownumber pentru afisarea numerelor de rand
-    public GridConfiguration<T> RowNumber(bool show = true, Alignment alignment = Alignment.Right)
+    public GridConfiguration<T> RowNumber(bool show = true, Alignment alignment = Alignment.Left)
     {
         ShowRowNumber = show;
         RowNumberAligment = alignment;
         return this;
     }
 
-    //adaugare coloane
-    public GridConfiguration<T> AddColumn<TProp>(string header, GridDataType dataType, Func<T, TProp> valueGetter, Alignment? alignment = null)
+    //adaugare coloane care stie cum sa extraga o proprietate din T, si ce tip de date are, pentru aliniere implicita
+    public GridConfiguration<T> AddColumn<TProp>(string header, Func<T, TProp> valueGetter, Alignment? alignment = null, Func<TProp, string>? cellFormatter = null)
     {
-        Columns.Add(new Column<T, TProp>(header, dataType, valueGetter, alignment));
+        Columns.Add(new Column<T, TProp>(header, valueGetter, alignment, cellFormatter));
         return this;
     }
-
 
     public void Validate()
     {
@@ -110,10 +107,11 @@ public class GridConfiguration<T> : IGridConfiguration<T>
         }
 
     }
-    //pentru resetarea transformarilor aplicate!!!!! orderby skip take where
+    //pentru resetarea transformarilor aplicate
     public GridConfiguration<T> ResetQuery()
     {
-        queryModifier = items => items; // identitate
+        //queryModifier - resetez la functia initiala care returneaza elementele nemodificate
+        queryModifier = items => items; 
         return this;
     }
 }
