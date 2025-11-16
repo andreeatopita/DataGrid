@@ -1,0 +1,27 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DataGrid_1.Formatting;
+
+public static class StudentFinancialExtensions
+{
+    public static void SpendMoneySafe(this Student s, decimal amount, DateTime? date = null)
+    {
+        try
+        {
+            s.SpendMoney(amount, date);
+            Console.WriteLine($"Spent {amount}. New balance: {s.AccountBalance}.\n");
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine($"Cannot spend {amount}. Current balance: {s.AccountBalance}.\n");
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("Amount must be greater than zero.\n");
+        }
+    }
+}

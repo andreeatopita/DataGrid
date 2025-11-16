@@ -6,9 +6,21 @@
     "FatherName": null,
     "DateOfBirth": "2004-03-15",
     "LastActiveAt": null,
-    "AccountBalance": 2000,
-    "IsActive": true
+    "IsActive": true,
+    "Transactions": [
+      {
+        "Amount": 1200,
+        "Date": "2025-10-10T09:00:00",
+        "Type": "Received"
+      },
+      {
+        "Amount": 100,
+        "Date": "2025-10-20T11:30:00",
+        "Type": "Spent"
+      }
+    ]
   },
+
   {
     "StudentId": 2,
     "FirstName": "Brian",
@@ -16,8 +28,14 @@
     "FatherName": null,
     "DateOfBirth": "2002-08-02",
     "LastActiveAt": "2025-11-03T13:37:00",
-    "AccountBalance": 240.5,
-    "IsActive": false
+    "IsActive": false,
+    "Transactions": [
+      {
+        "Amount": 240.5,
+        "Date": "2025-11-16T00:00:00",
+        "Type": "Received"
+      }
+    ]
   },
   {
     "StudentId": 3,
@@ -26,8 +44,8 @@
     "FatherName": null,
     "DateOfBirth": "2003-11-28",
     "LastActiveAt": null,
-    "AccountBalance": 0,
-    "IsActive": true
+    "IsActive": true,
+    "Transactions": []
   },
   {
     "StudentId": 4,
@@ -36,8 +54,8 @@
     "FatherName": null,
     "DateOfBirth": "2000-05-09",
     "LastActiveAt": null,
-    "AccountBalance": 0,
-    "IsActive": true
+    "IsActive": true,
+    "Transactions": []
   },
   {
     "StudentId": 5,
@@ -46,8 +64,8 @@
     "FatherName": null,
     "DateOfBirth": "2001-12-12",
     "LastActiveAt": "2025-11-07T10:01:00",
-    "AccountBalance": 0,
-    "IsActive": false
+    "IsActive": false,
+    "Transactions": []
   },
   {
     "StudentId": 6,
@@ -56,8 +74,8 @@
     "FatherName": null,
     "DateOfBirth": "2002-01-23",
     "LastActiveAt": null,
-    "AccountBalance": 0,
-    "IsActive": true
+    "IsActive": true,
+    "Transactions": []
   },
   {
     "StudentId": 7,
@@ -66,8 +84,8 @@
     "FatherName": null,
     "DateOfBirth": "2003-04-30",
     "LastActiveAt": null,
-    "AccountBalance": 0,
-    "IsActive": true
+    "IsActive": true,
+    "Transactions": []
   },
   {
     "StudentId": 8,
@@ -76,8 +94,8 @@
     "FatherName": null,
     "DateOfBirth": "1999-09-11",
     "LastActiveAt": "2025-11-08T18:03:00",
-    "AccountBalance": 0,
-    "IsActive": false
+    "IsActive": false,
+    "Transactions": []
   },
   {
     "StudentId": 9,
@@ -86,8 +104,8 @@
     "FatherName": null,
     "DateOfBirth": "2004-07-07",
     "LastActiveAt": null,
-    "AccountBalance": 0,
-    "IsActive": true
+    "IsActive": true,
+    "Transactions": []
   },
   {
     "StudentId": 10,
@@ -96,8 +114,8 @@
     "FatherName": null,
     "DateOfBirth": "2003-10-25",
     "LastActiveAt": null,
-    "AccountBalance": 0,
-    "IsActive": true
+    "IsActive": true,
+    "Transactions": []
   },
 
   {
@@ -107,8 +125,8 @@
     "FatherName": null,
     "DateOfBirth": "2001-05-23",
     "LastActiveAt": null,
-    "AccountBalance": 0,
-    "IsActive": true
+    "IsActive": true,
+    "Transactions": []
   },
   {
     "StudentId": 12,
@@ -117,8 +135,8 @@
     "FatherName": null,
     "DateOfBirth": "2003-12-10",
     "LastActiveAt": "2025-11-08T09:40:00",
-    "AccountBalance": 0,
-    "IsActive": false
+    "IsActive": false,
+    "Transactions": []
   },
   {
     "StudentId": 13,
@@ -127,8 +145,8 @@
     "FatherName": null,
     "DateOfBirth": "2002-09-05",
     "LastActiveAt": "2025-11-01T20:23:00",
-    "AccountBalance": 0,
-    "IsActive": false
+    "IsActive": false,
+    "Transactions": []
   },
   {
     "StudentId": 14,
@@ -137,8 +155,13 @@
     "FatherName": "Liam",
     "DateOfBirth": "2003-10-08",
     "LastActiveAt": "2025-11-07T22:50:00",
-    "AccountBalance": 100,
-    "IsActive": false
+    "IsActive": false,
+    "Transactions": [
+      {
+        "Amount": 100,
+        "Date": "2025-11-16T00:00:00",
+        "Type": "Received"
+      }
+    ]
   }
-
 ]

@@ -31,12 +31,12 @@ public class GridConfiguration<T> : IGridConfiguration<T>
     }
 
     //ordonare dupa o cheie aleasa, tkey - tipul cheii dupa care ordonez, adica string, int, datetime
-    public GridConfiguration<T> OrderBy<TKey>(Func<T, TKey> keySelector, bool asc = false)
+    public GridConfiguration<T> OrderBy<TKey>(Func<T, TKey> keySelector, bool desc = false)
     {
         // pastrez vechea functie
         Func<IEnumerable<T>, IEnumerable<T>> prev = queryModifier;
         //daca desc e true, ordonez descrescator, altfel crescator
-        if (asc)
+        if (desc)
         {
             queryModifier = items => prev(items).OrderByDescending(keySelector);
         }

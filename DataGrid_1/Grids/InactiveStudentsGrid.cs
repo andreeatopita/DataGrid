@@ -17,7 +17,7 @@ public class InactiveStudentsGrid : IGridBuilder<Student>
         return new GridConfiguration<Student>()
             .RowNumber(true)
             .Where(s => !s.IsActive)
-            .OrderBy(s => s.LastActiveAt, asc: true)
+            .OrderBy(s => s.LastActiveAt, desc: true)
             .AddColumn("Name", s => s.NameWithFather())
             .AddColumn("Age", s => s.ShortAge())
             .AddColumn("Last Active", s => s.LastActiveAt, cellFormatter: dt => dt.ToString("yyyy-MM-dd hh:mm tt"));

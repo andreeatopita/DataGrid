@@ -103,8 +103,8 @@ var newStudent = new Student(
         isActive: true,
         fatherName: "John",
         lastActiveAt: DateTime.Now,
-        accountBalance: 1500m
-    );
+        initialBalance: 1500m);
+//initial pentru tranzactii
 
 //aici pentru adaugarea unui student 
 /*
@@ -129,13 +129,13 @@ Console.WriteLine();
 
 //update student
 //am private set pe proprietati si nu pot modifica direct un obiect existent, deci adaug metode
-var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 7);
+var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 8);
 if (studentToUpdate != null)
 {
-
-    studentToUpdate.UpdateAccountBalance(5500m);
+    studentToUpdate.ReceiveMoney(500);
     studentToUpdate.UpdateFatherName("Noad");
     studentToUpdate.Deactivate();
+    //studentToUpdate.SpendMoneySafe(1000);
 
     if (store.Save(students))
     {
@@ -148,7 +148,7 @@ if (studentToUpdate != null)
 }
 else
 {
-    Console.WriteLine("Student with ID 2 not found for update.");
+    Console.WriteLine("Student not found for update.");
 }
 
 Console.WriteLine();
@@ -206,4 +206,10 @@ else
 
     Console.WriteLine($"Exported: {path}");
 }
-// AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+
+//EX 5
+Console.WriteLine("\n--Students_Recent_High_Value_Transactions--\n");
+GridConfiguration<Student> recentHighCfg = new RecentHighValueTransactionsGrid(culture: new CultureInfo("ro-RO")).Build();
+DataGrid<Student> recentHighGrid = new DataGrid<Student>(recentHighCfg, dataSourceA);
+recentHighGrid.Display();

@@ -38,7 +38,36 @@ public class JsonStudentStore : IJsonStudentStore
  
             //deserializare: din json in obiecte 
             List<StudentDto> dtos = JsonSerializer.Deserialize<List<StudentDto>>(json, _json) ?? new List<StudentDto>();
-            return dtos.Select(FromDto).ToList();
+            var result = new List<Student>();
+            foreach (var d in dtos)
+            {
+                // construiesc student fara balans initial (se reconstruieste din tranzactii)
+                var s = new Student(
+                    id: d.StudentId,
+                    firstName: d.FirstName,
+                    lastName: d.LastName,
+                    dateOfBirth: d.DateOfBirth,
+                    isActive: d.IsActive,
+                    fatherName: d.FatherName,
+                    lastActiveAt: d.LastActiveAt ?? default,
+                    initialBalance: 0m);
+
+                // daca lista de tranzactii e null, o initializez cu lista goala
+                d.Transactions ??= new List<TransactionDto>();
+
+                //reconstruiesc istoricul tranzactiilor in cont, ordonat dupa data
+                foreach (var t in d.Transactions.OrderBy(t => t.Date))
+                {
+                    if (string.Equals(t.Type, "Received", StringComparison.OrdinalIgnoreCase))
+                        s.ReceiveMoney(t.Amount, t.Date);
+
+                    else if (string.Equals(t.Type, "Spent", StringComparison.OrdinalIgnoreCase))
+                        s.SpendMoney(t.Amount, t.Date);
+                }
+                result.Add(s);
+            }
+
+            return result;
         }
         catch (JsonException ex)
         {
@@ -87,22 +116,6 @@ public class JsonStudentStore : IJsonStudentStore
 
         return false;
     }
-
-
-    //mapare dto in student pentru incarcare din json
-    private static Student FromDto(StudentDto d) => new Student(
-        //student nou cu proprietatile din dto
-        id: d.StudentId, //id din json in student
-        firstName: d.FirstName,
-        lastName: d.LastName,
-        dateOfBirth: d.DateOfBirth,
-        isActive: d.IsActive,
-        fatherName: d.FatherName,
-        //daca e null -> pun default -> constructorul din student pune data curenta
-        lastActiveAt: d.LastActiveAt ?? default, 
-        accountBalance: d.AccountBalance
-    );
-
     //from student to dto, salvare in json
     private static StudentDto ToDto(Student s) => new StudentDto
     {
@@ -112,7 +125,13 @@ public class JsonStudentStore : IJsonStudentStore
         FatherName = s.FatherName,
         DateOfBirth = s.DateOfBirth,
         LastActiveAt = s.LastActiveAt,
-        AccountBalance = s.AccountBalance,
-        IsActive = s.IsActive
+        IsActive = s.IsActive,
+        Transactions = s.Account.Transactions
+        .Select(tr => new TransactionDto
+        {
+            Amount = tr.Amount,
+            Date = tr.Date,
+            Type = tr.Type.ToString()
+        }).ToList(),
     };
 }

@@ -15,6 +15,8 @@ public class StudentDto
     public string? FatherName { get; set; }   
     public DateTime DateOfBirth { get; set; }
     public DateTime? LastActiveAt { get; set; }  //primesc null din json 
-    public decimal AccountBalance { get; set; }
     public bool IsActive { get; set; }
+
+    //lista de tranzactii pentru contul studentului
+    public List<TransactionDto> Transactions { get; set; } = new();
 }

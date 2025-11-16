@@ -36,7 +36,7 @@ public class StudentsByBalanceGrid : IGridBuilder<Student>
         return new GridConfiguration<Student>()
             .RowNumber(false)
             .Where(s=> s.AccountBalance >= 200)
-            .OrderBy(s=> s.DateOfBirth, asc:true)  //cel mai tanar primul
+            .OrderBy(s=> s.DateOfBirth, desc:true)  //cel mai tanar primul  
             .AddColumn("First Name", s => s.FirstName)
             .AddColumn("Last Name", s => s.LastName)
             .AddColumn("Date of Birth", s => s.DateOfBirth, cellFormatter: dt => dt.ToString("MMMM yyyy"))

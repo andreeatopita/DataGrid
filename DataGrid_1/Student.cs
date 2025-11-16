@@ -1,6 +1,8 @@
-﻿using System;
+﻿using DataGrid_1.AccountStructure;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,7 +19,8 @@ public class Student
     //dateonly?
     public DateTime DateOfBirth { get; private set; }
     public DateTime LastActiveAt { get; private set; }
-    public decimal AccountBalance { get; private set; }
+    //sold cont - dinamic, preia din account
+    public decimal AccountBalance => Account.Balance;
     public bool IsActive { get; private set; }
 
     //tuple pt varsta
@@ -41,11 +44,13 @@ public class Student
         return (years, months);
     }
 
+
+    public Account Account { get; } = new Account();
     public string FullName => $"{FirstName} {LastName}";
 
 
     //lastactiveat: daca e 
-    public Student(int id,string firstName, string lastName, DateTime dateOfBirth, bool isActive, string? fatherName = null, DateTime lastActiveAt = default, decimal accountBalance = 0)
+    public Student(int id,string firstName, string lastName, DateTime dateOfBirth, bool isActive, string? fatherName = null, DateTime lastActiveAt = default, decimal initialBalance = 0)
     {
         StudentId = id;
         FirstName = firstName;
@@ -56,17 +61,14 @@ public class Student
         FatherName = fatherName;
         //daca lastactiveat e default, pun data curenta, altfel pun ce am primit
         LastActiveAt = lastActiveAt== default ? DateTime.Now : lastActiveAt;
-        AccountBalance = accountBalance;
-
+        
+        if(initialBalance>0)
+            Account.Receive(initialBalance, DateTime.Now); // tranzactie
     }
 
     public Student() :this(0,string.Empty,string.Empty,default,false) {}
 
     //daca vreau sa modific un student, folosesc o metoda 
-    public void UpdateAccountBalance(decimal newBalance)
-    {
-        AccountBalance = newBalance;
-    }
 
     public void Activate()
     {
@@ -95,5 +97,10 @@ public class Student
     {
         FatherName = fatherName;
     }
+
+
+    //adaugare bani:
+    public void ReceiveMoney(decimal amount, DateTime? date=null) => Account.Receive(amount, date);
+    public void SpendMoney(decimal amount, DateTime? date=null) => Account.Spend(amount, date);
 }
 
