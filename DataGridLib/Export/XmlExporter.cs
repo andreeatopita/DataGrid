@@ -7,14 +7,16 @@ using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using DataGridLib.Export;
 
-namespace DataGrid_1.Export;
+namespace DataGridLib.Export;
+
 
 public class XmlExporter : IGridExporter
 {
     public string Extension => "xml";
 
-    public void Export(IReadOnlyList<string> headers, IReadOnlyList<string[]> rows, string filePath)
+    public void Export(IReadOnlyList<string> headers, IReadOnlyList<string[]> rows, string filePath, GridPage? pageExp = null)
     {
         //export ca si XML
         var setting = new XmlWriterSettings
@@ -29,6 +31,16 @@ public class XmlExporter : IGridExporter
             xml.WriteStartDocument();
 
             xml.WriteStartElement("DataGrid");
+
+            if (pageExp != null)
+            {
+                GridPage c = pageExp;
+                xml.WriteAttributeString("page", c.CurrentPage.ToString());
+                xml.WriteAttributeString("totalPages", c.TotalPages.ToString());
+                xml.WriteAttributeString("pageSize", c.PageSize.ToString());
+                xml.WriteAttributeString("totalItems", c.TotalItems.ToString());
+                xml.WriteAttributeString("itemsOnPage", rows.Count.ToString());
+            }
 
             foreach (string[] row in rows)
             {

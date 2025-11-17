@@ -11,16 +11,23 @@ namespace DataGridLib.Export;
 //antete si celule ca string pentru csv/xml
 public static class GridExportData
 {
-    public static (IReadOnlyList<string> headers, IReadOnlyList<string[]> rows) Build<T>(GridConfiguration<T> config, GridDataSource<T> dataSource)
+    public static (IReadOnlyList<string> headers, IReadOnlyList<string[]> rows) Build<T>(GridConfiguration<T> config, GridDataSource<T> dataSource, List<IColumn<T>> columns)
+    {
+        //returnez datele complete
+        return BuildFromItems(config, dataSource, dataSource.GetData(config),columns);
+    }
+
+    //metoda pentru export cu o lista de itemi data ca parametru
+    public static (IReadOnlyList<string> headers, IReadOnlyList<string[]> rows) BuildFromItems<T>(GridConfiguration<T> config, GridDataSource<T> dataSource,IEnumerable<T> items, List<IColumn<T>> columns)
     {
         //coloanele configurate prin addcolumn
-        List<IColumn<T>> columns = config.Columns;
+        //List<IColumn<T>> columns = config.Columns;
 
         //headere
         List<string> headers = new List<string>();
 
         //adaug # pt nr rand daca e cazul
-        if (config.ShowRowNumber) 
+        if (config.ShowRowNumber)
             headers.Add("#");
 
 
@@ -28,7 +35,7 @@ public static class GridExportData
         headers.AddRange(columns.Select(c => c.Header));
 
         //datele in obiecte row( rand = string[] celule)
-        List<Row> formattedRows = dataSource.ToRows(columns, config);
+        List<Row> formattedRows = dataSource.ToRows(columns,items);
 
         //lista de randuri
         List<string[]> rows = new List<string[]>(formattedRows.Count);

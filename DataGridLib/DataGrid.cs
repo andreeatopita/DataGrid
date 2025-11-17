@@ -11,13 +11,123 @@ public class DataGrid<T>
     private GridConfiguration<T> Configuration { get; }
     private GridDataSource<T> DataSource { get; }
 
+    //paginare: incepe la 1
+    private int CurrentPage;
+
+    //coloanele 
+    private List<IColumn<T>>? LastDisplayedCols;
+
     //cel putin o coloana si fiecare un header valid 
     public DataGrid(GridConfiguration<T> Configuration, GridDataSource<T> DataSource)
     {
         this.Configuration = Configuration;
         this.DataSource = DataSource;
         Configuration.Validate();
+        CurrentPage = 1; //default
     }
+    private bool PagOn()
+    {
+        return Configuration.PageSize > 0;
+    }
+
+    //ia toate itemele, aplica filtru si ordonare
+    private IEnumerable<T> OrderedItems()
+    {
+        //iau randurile din datasource si aplic config( filtru, ordonare)
+        return DataSource.GetData(Configuration);
+    }
+
+    //total pagini
+    private int TotalPages(int itemCount)
+    {
+        if (!PagOn())
+        {
+            return 1;
+        }
+        // pagini: (nr total iteme + pag size -1 ) / pag size
+        return (itemCount + Configuration.PageSize - 1) / Configuration.PageSize;
+    }
+
+    // ia items si returneaza doar cele din pagina curenta
+    private IEnumerable<T> PageSlice(IEnumerable<T> items)
+    {
+        if (!PagOn())
+        {
+            return items;
+        }
+        int count= items.Count();
+        int totalPages = TotalPages(count);
+
+        if (CurrentPage > totalPages)
+        {
+            CurrentPage = totalPages;
+        }
+        //cate sar se: (pagina curenta -1) * pag size
+        //de ex pagina 2, pag size 10: (2-1)*10=10 sar 10 iteme
+        int skip = (CurrentPage - 1) * Configuration.PageSize;
+        return items.Skip(skip).Take(Configuration.PageSize);
+    }
+
+    //navigation:
+    public void FirstPage()
+    {
+        if(PagOn())
+            CurrentPage = 1;
+    }
+    public void LastPage()
+    {
+        if(PagOn())
+        {
+            //setez pagina curenta la ultima pagina
+            CurrentPage = TotalPages(OrderedItems().Count());
+        }
+    }
+    
+    public void NextPage()
+    {
+        //daca e paginare si nu sunt la ultima pagina
+        int totalPages = TotalPages(OrderedItems().Count());
+        if (PagOn() && CurrentPage < totalPages)
+        {
+            CurrentPage++;
+        }
+    }
+
+    public void PreviousPage()
+    {
+        //daca e paginare si nu sunt la prima pagina
+        if (PagOn() && CurrentPage > 1)
+        {
+            CurrentPage--;
+        }
+    }
+
+    public void GoToPage(int pageNumber)
+    {
+        int totalPages = TotalPages(OrderedItems().Count());
+
+        if (PagOn())
+        {
+            //daca e valida, setez pagina curenta
+            if (pageNumber > 0 && pageNumber <= totalPages)
+            {
+                CurrentPage = pageNumber;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid page number.");
+            }
+        }
+    }
+    //dupa ce am creat grila, modific marimea paginii fara sa creez un datagrid nou 
+    public void ChangePageSize(int pageSize)
+    {
+        Configuration.EnablePagination(pageSize);
+        CurrentPage = 1; //resetez la prima pagina
+    }
+
+
+
 
 
     //overload: afisez doar coloanele a caror header le dau eu ca parametru
@@ -43,6 +153,8 @@ public class DataGrid<T>
             if (cols.Count == 0)
                 cols = Configuration.Columns;
         }
+        //coloanele selectate
+        LastDisplayedCols = cols;
 
         Display(cols);
     }
@@ -52,7 +164,26 @@ public class DataGrid<T>
     {
         //pt fiecare item din items aplica,in ordine: pt # ia s.studentid si conv la string , si le pune intr un string[] si construieste un row
         //row[0] = "1", "danie","yes"... 
-        List<Row> rows = DataSource.ToRows(cols, Configuration);
+
+        //iau itemele ordonate si filtrate
+        IEnumerable<T> ordered = OrderedItems();
+        //numar total iteme dupa filtru
+        int totalItems = ordered.Count();
+
+        //paginare, ia doar itemele din pagina curenta
+        IEnumerable<T> pageItems = PageSlice(ordered);
+
+
+
+        //slice ul curent devine row
+        //page items= cati am pe o pagina 
+        List<Row> rows = DataSource.ToRows(cols, pageItems);
+
+        if (PagOn())
+        {
+            Console.WriteLine($"-- Page {CurrentPage}/{TotalPages(totalItems)} | PageSize={Configuration.PageSize} | ItemsOnPage={rows.Count} | TotalItems={totalItems} --");
+        }
+
 
         //calcul latimi pt coloanele ,max dintre lungimea header ului si cea mai lunga val textuala 
         int[] widths = new int[cols.Count];
@@ -108,6 +239,7 @@ public class DataGrid<T>
             }
             Console.WriteLine();
         }
+
     }
 
     private static string Align(string text, int width, Alignment align)
@@ -127,17 +259,56 @@ public class DataGrid<T>
         };
     }
 
-    public void ExportDataGrid(IGridExporter exporter, string path)
+    //doar pagina curenta
+    public void ExportDataGrid(IGridExporter exporter)
     {
         if (exporter == null) 
             throw new ArgumentNullException(nameof(exporter));
 
-        if (string.IsNullOrWhiteSpace(path)) 
-            throw new ArgumentException("Invalid path.", nameof(path));
+        string path = Path.Combine(AppContext.BaseDirectory, $"std_export.{exporter.Extension}");
 
-        var (header, row) = GridExportData.Build(Configuration, DataSource);
+        //aplic where/orderby din config
+        var ordered = OrderedItems().ToList();
 
-        exporter.Export(header, row, path);
+        //abia dupa ordonare aplic paginarea
+        var pageItems = PageSlice(ordered);
 
+        int totalItems = ordered.Count;
+
+        //daca am afisat anterior doar anumite coloane, le folosesc pe alea
+        var visibleCol = LastDisplayedCols ?? Configuration.Columns;
+
+        var (headers, rows) = GridExportData.BuildFromItems(Configuration, DataSource,pageItems, visibleCol);
+
+        GridPage? exportPage = BuildPageExp(totalItems, rows.Count);
+
+        try
+        {
+            exporter.Export(headers, rows, path, exportPage);
+            Console.WriteLine($"Exported: {path}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error exporting data grid: {ex.Message}");
+        }
+    }
+
+    //daca paginarea e dezactivata returnez null, nu afiseaza nimic despre paginare
+    private GridPage? BuildPageExp(int totalItems, int itemsOnPage)
+    {
+        if (!PagOn())
+            return null;
+
+        int totalPages = TotalPages(totalItems);
+
+        if (CurrentPage > totalPages) 
+            CurrentPage = totalPages;
+
+        return new GridPage(
+            CurrentPage,
+            totalPages,
+            Configuration.PageSize,
+            totalItems,
+            itemsOnPage);
     }
 }

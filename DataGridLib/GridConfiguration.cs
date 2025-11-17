@@ -18,6 +18,26 @@ public class GridConfiguration<T> : IGridConfiguration<T>
     //filtrari, ordonari. functie de la secv la secv , fiecare metoda: where orderby skip modifica functia anterioara, lant
     //iau o secventa de T, inotrc o secventa de T
 
+    //paginare ; off
+    public int PageSize { get; private set; } = 0;
+
+    public GridConfiguration<T> EnablePagination(int pageSize)
+    {
+        if(pageSize<=0)
+        {
+            throw new ArgumentException("Page size must be greater than zero.");
+        }
+        PageSize = pageSize;
+        return this;
+    }
+
+    public GridConfiguration<T> DisablePagination()
+    {
+        PageSize = 0;
+        return this;
+    }
+
+
 
     //filtrare cu where si predicat
     //pastreaza doar elementele pentru care predicatul e true

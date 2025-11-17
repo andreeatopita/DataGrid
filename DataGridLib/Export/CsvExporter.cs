@@ -5,18 +5,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataGrid_1.Export;
+namespace DataGridLib.Export;
 
 public class CsvExporter : IGridExporter
 {
     public string Extension => "csv";
 
-    public void Export(IReadOnlyList<string> headers, IReadOnlyList<string[]> rows, string filePath)
+    public void Export(IReadOnlyList<string> headers, IReadOnlyList<string[]> rows, string filePath, GridPage? pageExp = null)
     {
         try
         {
             //stream writer pt scriere in fisier
             using var writer = new StreamWriter(filePath, false, Encoding.UTF8);
+
+            if (pageExp != null)
+            {
+                var c = pageExp;
+                writer.WriteLine($"# Page {c.CurrentPage}/{c.TotalPages} | PageSize={c.PageSize} | ItemsOnPage={rows.Count} | TotalItems={c.TotalItems}");
+            }
+
 
             //scriu headerele cu , 
             writer.WriteLine(string.Join(",", headers.Select(NormalizeHeader)));

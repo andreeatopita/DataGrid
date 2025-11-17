@@ -47,4 +47,13 @@ public class GridDataSource<T> : IGridDataSource<T>
         }
         return rows;
     }
+
+    //transf elemente filtrare in randuri pentru afisare in grid
+    public List<Row> ToRows(List<IColumn<T>> columns, IEnumerable<T> items)
+    {
+        var rows = new List<Row>();
+        foreach (var item in items)
+            rows.Add(new Row(columns.Select(c => c.GetCellText(item))));
+        return rows;
+    }
 }

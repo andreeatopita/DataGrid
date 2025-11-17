@@ -10,5 +10,5 @@ public interface IGridExporter
 {
     string Extension { get; }
    
-    void Export(IReadOnlyList<string> headers, IReadOnlyList<string[]> rows, string filePath);
+    void Export(IReadOnlyList<string> headers, IReadOnlyList<string[]> rows, string filePath,GridPage? pageExp=null);
 }

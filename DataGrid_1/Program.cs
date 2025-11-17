@@ -129,7 +129,8 @@ Console.WriteLine();
 
 //update student
 //am private set pe proprietati si nu pot modifica direct un obiect existent, deci adaug metode
-var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 8);
+
+/*var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 8);
 if (studentToUpdate != null)
 {
     studentToUpdate.ReceiveMoney(500);
@@ -154,6 +155,7 @@ else
 Console.WriteLine();
 Console.WriteLine("--Students_After_Updating_Student--");
 gridA.Display();
+*/
 
 //EX 2 studenti inactivi
 Console.WriteLine("\n--Students_Inactive--\n");
@@ -186,6 +188,50 @@ DataGrid<Student> balanceGridJP = new DataGrid<Student>(balanceCfgJP, dataSource
 balanceGridJP.Display();
 
 
+//EX 5
+Console.WriteLine("\n--Students_Recent_High_Value_Transactions--\n");
+GridConfiguration<Student> recentHighCfg = new RecentHighValueTransactionsGrid(culture: new CultureInfo("ro-RO")).Build();
+DataGrid<Student> recentHighGrid = new DataGrid<Student>(recentHighCfg, dataSourceA);
+recentHighGrid.Display();
+
+
+//EX 6 : paginare 
+
+//pornesc paginarea :
+cfg.EnablePagination(2);
+
+Console.WriteLine("\n-- Page 1 (after EnablePagination) --\n");
+gridA.Display();
+
+Console.WriteLine("\n-- NextPage --\n");
+gridA.NextPage();
+gridA.Display();
+
+Console.WriteLine("\n-- GotToPage5 --\n");
+gridA.GoToPage(3);
+gridA.Display();
+
+
+Console.WriteLine("\n-- Previous Page --\n");
+gridA.PreviousPage();
+gridA.Display();
+
+Console.WriteLine("\n-- LastPage --\n");
+gridA.LastPage();
+gridA.Display();
+
+
+Console.WriteLine("\n-- FirstPage --\n");
+gridA.FirstPage();
+gridA.Display();
+
+Console.WriteLine("\n-- ChangePageSize --\n");
+gridA.ChangePageSize(5);
+gridA.Display();
+
+
+//export in format
+
 //EX 4 export datagrid to csv or xml
 Console.WriteLine("\nChoose export format txt(1)/csv(2)/xml(3)/: ");
 string? choice = Console.ReadLine();
@@ -200,16 +246,48 @@ if (export == null)
 }
 else
 {
-    string path = Path.Combine(AppContext.BaseDirectory, $"std_export.{export.Extension}");
-
-    gridA.ExportDataGrid(export, path);
-
-    Console.WriteLine($"Exported: {path}");
+    gridA.ExportDataGrid(export);
 }
 
+cfg.DisablePagination();
+gridA.Display();
 
-//EX 5
-Console.WriteLine("\n--Students_Recent_High_Value_Transactions--\n");
-GridConfiguration<Student> recentHighCfg = new RecentHighValueTransactionsGrid(culture: new CultureInfo("ro-RO")).Build();
-DataGrid<Student> recentHighGrid = new DataGrid<Student>(recentHighCfg, dataSourceA);
-recentHighGrid.Display();
+
+//ex5: receive si spend
+
+var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 100);
+if (studentToUpdate != null)
+{
+    studentToUpdate.ReceiveMoney(4500);
+    studentToUpdate.SpendMoneySafe(1000);
+
+
+    if (store.Save(students))
+    {
+        Console.WriteLine("Student updated and saved to JSON.");
+    }
+    else
+    {
+        Console.WriteLine("Failed to save updated student to JSON.");
+    }
+}
+else
+{
+    Console.WriteLine("Student not found for update.");
+}
+
+Console.WriteLine();
+Console.WriteLine("--Students_After_Updating_Student--");
+gridA.Display();
+
+
+cfg.EnablePagination(3);
+Console.WriteLine("\n--Paginated View After Transactions--\n");
+gridA.Display();
+
+
+Console.WriteLine("\n-- GotToPage4 --\n");
+gridA.GoToPage(99);
+gridA.Display();
+
+gridA.ExportDataGrid(new CsvExporter());
