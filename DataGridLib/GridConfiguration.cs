@@ -27,6 +27,7 @@ public class GridConfiguration<T> : IGridConfiguration<T>
         {
             throw new ArgumentException("Page size must be greater than zero.");
         }
+
         PageSize = pageSize;
         return this;
     }
@@ -67,6 +68,15 @@ public class GridConfiguration<T> : IGridConfiguration<T>
         return this;
     }
 
+    public GridConfiguration<T> ThenBy<TKey>(Func<T, TKey> keySelector)
+    {
+        // pastrez vechea functie
+        Func<IEnumerable<T>, IEnumerable<T>> prev = queryModifier;
+        //daca desc e true, ordonez descrescator, altfel crescator
+        
+
+        return this;
+    }
 
     //sare peste primele n elemente ( pt paginare)
     public GridConfiguration<T> Skip(int n)

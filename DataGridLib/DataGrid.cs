@@ -11,11 +11,11 @@ public class DataGrid<T>
     private GridConfiguration<T> Configuration { get; }
     private GridDataSource<T> DataSource { get; }
 
-    //paginare: incepe la 1
-    private int CurrentPage;
+    private PageNavigation Nav { get; }
 
     //coloanele 
     private List<IColumn<T>>? LastDisplayedCols;
+    
 
     //cel putin o coloana si fiecare un header valid 
     public DataGrid(GridConfiguration<T> Configuration, GridDataSource<T> DataSource)
@@ -23,12 +23,11 @@ public class DataGrid<T>
         this.Configuration = Configuration;
         this.DataSource = DataSource;
         Configuration.Validate();
-        CurrentPage = 1; //default
+
+        //porneste de la pagina1
+        Nav = new PageNavigation(Configuration.PageSize);
     }
-    private bool PagOn()
-    {
-        return Configuration.PageSize > 0;
-    }
+
 
     //ia toate itemele, aplica filtru si ordonare
     private IEnumerable<T> OrderedItems()
@@ -37,97 +36,49 @@ public class DataGrid<T>
         return DataSource.GetData(Configuration);
     }
 
-    //total pagini
-    private int TotalPages(int itemCount)
-    {
-        if (!PagOn())
-        {
-            return 1;
-        }
-        // pagini: (nr total iteme + pag size -1 ) / pag size
-        return (itemCount + Configuration.PageSize - 1) / Configuration.PageSize;
-    }
-
-    // ia items si returneaza doar cele din pagina curenta
-    private IEnumerable<T> PageSlice(IEnumerable<T> items)
-    {
-        if (!PagOn())
-        {
-            return items;
-        }
-        int count= items.Count();
-        int totalPages = TotalPages(count);
-
-        if (CurrentPage > totalPages)
-        {
-            CurrentPage = totalPages;
-        }
-        //cate sar se: (pagina curenta -1) * pag size
-        //de ex pagina 2, pag size 10: (2-1)*10=10 sar 10 iteme
-        int skip = (CurrentPage - 1) * Configuration.PageSize;
-        return items.Skip(skip).Take(Configuration.PageSize);
-    }
-
-    //navigation:
-    public void FirstPage()
-    {
-        if(PagOn())
-            CurrentPage = 1;
-    }
-    public void LastPage()
-    {
-        if(PagOn())
-        {
-            //setez pagina curenta la ultima pagina
-            CurrentPage = TotalPages(OrderedItems().Count());
-        }
-    }
-    
-    public void NextPage()
-    {
-        //daca e paginare si nu sunt la ultima pagina
-        int totalPages = TotalPages(OrderedItems().Count());
-        if (PagOn() && CurrentPage < totalPages)
-        {
-            CurrentPage++;
-        }
-    }
-
-    public void PreviousPage()
-    {
-        //daca e paginare si nu sunt la prima pagina
-        if (PagOn() && CurrentPage > 1)
-        {
-            CurrentPage--;
-        }
-    }
-
-    public void GoToPage(int pageNumber)
-    {
-        int totalPages = TotalPages(OrderedItems().Count());
-
-        if (PagOn())
-        {
-            //daca e valida, setez pagina curenta
-            if (pageNumber > 0 && pageNumber <= totalPages)
-            {
-                CurrentPage = pageNumber;
-            }
-            else
-            {
-                throw new ArgumentException("Invalid page number.");
-            }
-        }
-    }
-    //dupa ce am creat grila, modific marimea paginii fara sa creez un datagrid nou 
-    public void ChangePageSize(int pageSize)
+    //pagina activata si setare la 1
+    public void EnablePagination(int pageSize)
     {
         Configuration.EnablePagination(pageSize);
-        CurrentPage = 1; //resetez la prima pagina
+        Nav.SetPageSize(pageSize);
     }
 
+    //dazactivez si setez pagina size 0
+    public void DisablePagination()
+    {
+        Configuration.DisablePagination();
+        Nav.SetPageSize(0);
+    }
 
+    //dau enable si dupa setez la pagina pe care o zic
+    public void ChangePageSize(int pageSize)
+    {
+        EnablePagination(pageSize);
+    }
 
+    public void First()
+    {
+        Nav.FirstPage();
+    }
+    
+    public void Last()
+    {
+        Nav.LastPage();
+    }
+
+    public void Next()
+    {
+        Nav.NextPage();
+    }
+
+    public void Previous()
+    {
+        Nav.PreviousPage();
+    }
+    public void GoToPage(int pageNumber)
+    {
+        Nav.GoToPageNo(pageNumber);
+    }
 
 
     //overload: afisez doar coloanele a caror header le dau eu ca parametru
@@ -167,21 +118,21 @@ public class DataGrid<T>
 
         //iau itemele ordonate si filtrate
         IEnumerable<T> ordered = OrderedItems();
-        //numar total iteme dupa filtru
+
+        //aici setez numarul total de iteme pt paginare
+        Nav.UpdateTotalItems(ordered.Count());
+
+        var pageItems=Nav.PageSlice(ordered);
+
         int totalItems = ordered.Count();
-
-        //paginare, ia doar itemele din pagina curenta
-        IEnumerable<T> pageItems = PageSlice(ordered);
-
-
-
         //slice ul curent devine row
         //page items= cati am pe o pagina 
+
         List<Row> rows = DataSource.ToRows(cols, pageItems);
 
-        if (PagOn())
+        if (Nav.Enabled)
         {
-            Console.WriteLine($"-- Page {CurrentPage}/{TotalPages(totalItems)} | PageSize={Configuration.PageSize} | ItemsOnPage={rows.Count} | TotalItems={totalItems} --");
+            Console.WriteLine($"-- Page {Nav.CurrentPage}/{Nav.TotalPages} | PageSize={Nav.PageSize} | ItemsOnPage={rows.Count} | TotalItems={totalItems} --");
         }
 
 
@@ -271,7 +222,7 @@ public class DataGrid<T>
         var ordered = OrderedItems().ToList();
 
         //abia dupa ordonare aplic paginarea
-        var pageItems = PageSlice(ordered);
+        var pageItems = Nav.PageSlice(ordered);
 
         int totalItems = ordered.Count;
 
@@ -296,18 +247,15 @@ public class DataGrid<T>
     //daca paginarea e dezactivata returnez null, nu afiseaza nimic despre paginare
     private GridPage? BuildPageExp(int totalItems, int itemsOnPage)
     {
-        if (!PagOn())
+        if (!Nav.Enabled)
             return null;
 
-        int totalPages = TotalPages(totalItems);
-
-        if (CurrentPage > totalPages) 
-            CurrentPage = totalPages;
+        int totalPages = Nav.TotalPages;
 
         return new GridPage(
-            CurrentPage,
+            Nav.CurrentPage,
             totalPages,
-            Configuration.PageSize,
+            Nav.PageSize,
             totalItems,
             itemsOnPage);
     }

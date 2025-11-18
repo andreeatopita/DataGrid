@@ -16,7 +16,7 @@ public class Transaction
     public Transaction(decimal amount, DateTime date, TransactionType type)
     {
         if(amount<= 0)
-            throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
+            throw new ArgumentException("Amount must be greater than zero.");
 
         Date = date;
 

@@ -32,6 +32,8 @@ public class RecentHighValueTransactionsGrid : IGridBuilder<Student>
         Currency = CurrencyFormatter.CreateFromCulture(Culture);
         //creeaza pe baza culturii
     }
+
+
     public GridConfiguration<Student> Build()
     {
         return new GridConfiguration<Student>()
@@ -47,6 +49,8 @@ public class RecentHighValueTransactionsGrid : IGridBuilder<Student>
             cellFormatter: amount => Currency.FormatCurrency(amount)); //currency : formateaza suma in functie de cultura
     }
 
+
+
     //verific daca studentul are tranzactii care indeplinesc conditiile
     private bool HasQualifying(Student s) =>
         s.Account.Transactions.Any(t =>
@@ -61,7 +65,7 @@ public class RecentHighValueTransactionsGrid : IGridBuilder<Student>
                         t.Amount > MinAmount &&
                         t.Date >= DateTime.Now.AddDays(-Days))
             .Select(t => t.Amount)
-            .DefaultIfEmpty(0m) //daca nu exista tranzactii, returneaza 0
+            .DefaultIfEmpty(0) //daca nu exista tranzactii, returneaza 0
             .Max(); //returneaza val maxima
 
     //returneaza data tranzactiei cu suma maxima care indeplineste conditiile

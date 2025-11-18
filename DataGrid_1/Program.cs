@@ -130,10 +130,11 @@ Console.WriteLine();
 //update student
 //am private set pe proprietati si nu pot modifica direct un obiect existent, deci adaug metode
 
-/*var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 8);
+/*
+var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 8);
 if (studentToUpdate != null)
 {
-    studentToUpdate.ReceiveMoney(500);
+    studentToUpdate.ReceiveMoney(500,new DateTime(2024,1,2);
     studentToUpdate.UpdateFatherName("Noad");
     studentToUpdate.Deactivate();
     //studentToUpdate.SpendMoneySafe(1000);
@@ -151,11 +152,12 @@ else
 {
     Console.WriteLine("Student not found for update.");
 }
+*/
 
 Console.WriteLine();
 Console.WriteLine("--Students_After_Updating_Student--");
 gridA.Display();
-*/
+
 
 //EX 2 studenti inactivi
 Console.WriteLine("\n--Students_Inactive--\n");
@@ -204,7 +206,7 @@ Console.WriteLine("\n-- Page 1 (after EnablePagination) --\n");
 gridA.Display();
 
 Console.WriteLine("\n-- NextPage --\n");
-gridA.NextPage();
+gridA.Next();
 gridA.Display();
 
 Console.WriteLine("\n-- GotToPage5 --\n");
@@ -213,16 +215,16 @@ gridA.Display();
 
 
 Console.WriteLine("\n-- Previous Page --\n");
-gridA.PreviousPage();
+gridA.Previous();
 gridA.Display();
 
 Console.WriteLine("\n-- LastPage --\n");
-gridA.LastPage();
+gridA.Last();
 gridA.Display();
 
 
 Console.WriteLine("\n-- FirstPage --\n");
-gridA.FirstPage();
+gridA.First();
 gridA.Display();
 
 Console.WriteLine("\n-- ChangePageSize --\n");
@@ -255,11 +257,11 @@ gridA.Display();
 
 //ex5: receive si spend
 
-var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 100);
+var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 11);
 if (studentToUpdate != null)
 {
-    studentToUpdate.ReceiveMoney(4500);
-    studentToUpdate.SpendMoneySafe(1000);
+    studentToUpdate.ReceiveMoney(4500,new DateTime(2024,1,2));
+    studentToUpdate.SpendMoneySafe(1000,new DateTime(2024,1,2));
 
 
     if (store.Save(students))

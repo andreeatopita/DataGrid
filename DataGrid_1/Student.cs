@@ -1,11 +1,10 @@
-﻿using DataGrid_1.AccountStructure;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
-
+using AccountLib;
 namespace DataGrid_1;
 
 public class Student
@@ -20,6 +19,7 @@ public class Student
     public DateTime DateOfBirth { get; private set; }
     public DateTime LastActiveAt { get; private set; }
     //sold cont - dinamic, preia din account
+
     public decimal AccountBalance => Account.Balance;
     public bool IsActive { get; private set; }
 
@@ -102,5 +102,9 @@ public class Student
     //adaugare bani:
     public void ReceiveMoney(decimal amount, DateTime? date=null) => Account.Receive(amount, date);
     public void SpendMoney(decimal amount, DateTime? date=null) => Account.Spend(amount, date);
+
+
+    //metode legate de account:
+
 }
 

@@ -18,6 +18,7 @@ public class StudentsByBalanceGrid : IGridBuilder<Student>
     //cultura aleasa pentru afisare...
     private CultureInfo Culture { get; }
 
+
     public StudentsByBalanceGrid(CultureInfo? culture=null, string? prefix = null, string? suffix=null)
     {
         //daca cultura e null, folosesc cultura curenta, daca nu e null, folosesc cultura primita
@@ -30,6 +31,7 @@ public class StudentsByBalanceGrid : IGridBuilder<Student>
         else 
             Currency=new CurrencyFormatter(Culture, prefix, suffix);
     }
+
 
     public GridConfiguration<Student> Build()
     {
