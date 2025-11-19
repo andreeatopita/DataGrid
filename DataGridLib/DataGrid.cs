@@ -15,6 +15,8 @@ public class DataGrid<T>
 
     //coloanele 
     private List<IColumn<T>>? LastDisplayedCols;
+
+    private int LastPage;
     
 
     //cel putin o coloana si fiecare un header valid 
@@ -24,9 +26,20 @@ public class DataGrid<T>
         this.DataSource = DataSource;
         Configuration.Validate();
 
+
         //porneste de la pagina1
         Nav = new PageNavigation(Configuration.PageSize);
+        
     }
+
+    //private void SyncPageSize()
+    //{
+    //    if (Configuration.PageSize != LastPageSize)
+    //    {
+    //        Nav.SetPageSize(Configuration.PageSize);
+    //        LastPageSize = Configuration.PageSize;
+    //    }
+    //}
 
 
     //ia toate itemele, aplica filtru si ordonare
@@ -60,7 +73,7 @@ public class DataGrid<T>
     {
         Nav.FirstPage();
     }
-    
+
     public void Last()
     {
         Nav.LastPage();
@@ -80,10 +93,10 @@ public class DataGrid<T>
         Nav.GoToPageNo(pageNumber);
     }
 
-
     //overload: afisez doar coloanele a caror header le dau eu ca parametru
     public void Display(params string[] columnHeaders)
     {
+
         //filtrez coloanele din config dupa headerele date ca parametru
         List<IColumn<T>> cols;
 
@@ -115,6 +128,8 @@ public class DataGrid<T>
     {
         //pt fiecare item din items aplica,in ordine: pt # ia s.studentid si conv la string , si le pune intr un string[] si construieste un row
         //row[0] = "1", "danie","yes"... 
+
+        //SyncPageSize();
 
         //iau itemele ordonate si filtrate
         IEnumerable<T> ordered = OrderedItems();
@@ -214,7 +229,9 @@ public class DataGrid<T>
     public void ExportDataGrid(IGridExporter exporter)
     {
         if (exporter == null) 
-            throw new ArgumentNullException(nameof(exporter));
+            throw new ArgumentNullException("Exporter null.");
+
+        //SyncPageSize();
 
         string path = Path.Combine(AppContext.BaseDirectory, $"std_export.{exporter.Extension}");
 

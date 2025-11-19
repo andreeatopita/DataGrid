@@ -8,13 +8,28 @@ namespace DataGridLib;
 
 internal class PageNavigation
 {
-    public int PageSize { get; private set; }
-    public int CurrentPage { get; private set; }
+    public int PageSize { get; set; }
+    public int CurrentPage { get; set; }
+    
+
     public bool Enabled => PageSize > 0;
 
+    //numarul total de iteme folosit la calculul paginilor
     private int totalItems;
-
+    
     public int TotalPages => TotalPagesMeth(totalItems);
+
+    //calculez total pagini din total items
+    public int TotalPagesMeth(int totalItems)
+    {
+        if (!Enabled)
+        {
+            return 1;
+        }
+        // pagini: (nr total iteme + pag size -1 ) / pag size
+        return (totalItems + PageSize - 1) / PageSize;
+    }
+
 
     public PageNavigation(int pageSize)
     {
@@ -32,16 +47,6 @@ internal class PageNavigation
         CurrentPage = 1; //reset to first page
     }
 
-    public int TotalPagesMeth(int totalItems)
-    {
-        if (!Enabled)
-        {
-            return 1;
-        }
-        // pagini: (nr total iteme + pag size -1 ) / pag size
-        return (totalItems + PageSize - 1) / PageSize;
-    }
-
     //metoda care actualizeaza total items, adica cate iteme sunt in total
     public void UpdateTotalItems(int totalItems)
     {
@@ -49,15 +54,20 @@ internal class PageNavigation
         {
             throw new ArgumentException("Total items cannot be negative.");
         }
-        //actualizez total items
+
         this.totalItems = totalItems;
 
-        if(CurrentPage > TotalPages)
+        //daca pagina curenta e mai mare decat total pagini, setez pagina curenta la ultima pagina
+        if (CurrentPage > TotalPages)
         {
             CurrentPage = TotalPages;
         }
-    }
 
+        if(CurrentPage < 1)
+        {
+            CurrentPage = 1;
+        }
+    }
 
     public IEnumerable<T> PageSlice<T>(IEnumerable<T> items)
     {
@@ -78,6 +88,7 @@ internal class PageNavigation
         if (Enabled)
             CurrentPage = 1;
     }
+
 
     public void LastPage()
     {
@@ -116,7 +127,6 @@ internal class PageNavigation
 
     public void GoToPageNo(int pageNumber)
     {
-  
         if (Enabled)
         {
             //daca e valida, setez pagina curenta

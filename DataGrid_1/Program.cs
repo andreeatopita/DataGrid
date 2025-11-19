@@ -200,7 +200,8 @@ recentHighGrid.Display();
 //EX 6 : paginare 
 
 //pornesc paginarea :
-cfg.EnablePagination(2);
+cfg.EnablePagination(1);
+//gridA.EnablePagination(1);  
 
 Console.WriteLine("\n-- Page 1 (after EnablePagination) --\n");
 gridA.Display();
@@ -260,7 +261,7 @@ gridA.Display();
 var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 11);
 if (studentToUpdate != null)
 {
-    studentToUpdate.ReceiveMoney(4500,new DateTime(2024,1,2));
+    studentToUpdate.ReceiveSafe(4500,new DateTime(2024,1,2));
     studentToUpdate.SpendMoneySafe(1000,new DateTime(2024,1,2));
 
 

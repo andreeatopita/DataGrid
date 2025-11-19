@@ -45,12 +45,10 @@ public class Student
     }
 
 
-    public Account Account { get; } = new Account();
+    private Account Account { get; } = new Account();
     public string FullName => $"{FirstName} {LastName}";
 
-
-    //lastactiveat: daca e 
-    public Student(int id,string firstName, string lastName, DateTime dateOfBirth, bool isActive, string? fatherName = null, DateTime lastActiveAt = default, decimal initialBalance = 0)
+    public Student(int id,string firstName, string lastName, DateTime dateOfBirth, bool isActive, string? fatherName = null, DateTime? lastActiveAt = null, decimal initialBalance = 0)
     {
         StudentId = id;
         FirstName = firstName;
@@ -60,9 +58,12 @@ public class Student
 
         FatherName = fatherName;
         //daca lastactiveat e default, pun data curenta, altfel pun ce am primit
-        LastActiveAt = lastActiveAt== default ? DateTime.Now : lastActiveAt;
-        
-        if(initialBalance>0)
+        //LastActiveAt = lastActiveAt== default ? DateTime.Now : lastActiveAt;
+
+        LastActiveAt = LastActiveAt = lastActiveAt ?? DateTime.Now;
+
+
+        if (initialBalance>0)
             Account.Receive(initialBalance, DateTime.Now); // tranzactie
     }
 
@@ -105,6 +106,35 @@ public class Student
 
 
     //metode legate de account:
+    //returnez toate tranzactiile
+    public IEnumerable<TransactionInfo> AllTransactions() => Account.GetTransactions();
+
+    public IEnumerable<TransactionInfo> ReceivedTransactions() => Account.GetReceived();
+
+    public IEnumerable<TransactionInfo> SpentTransactions() => Account.GetSpent();
+
+    public IEnumerable<TransactionInfo> RecentReceivedAbove(decimal minAmount, int days) => Account.GetRecentReceivedAbove(minAmount, days);
+
+    //metoda bool pentru a verifica daca exista tranzactii de tip received 
+    public bool HasRecentReceivedAbove(decimal minAmount, int days) =>
+        RecentReceivedAbove(minAmount, days).Any();
+
+    //returneaza suma maxima a tranzactiilor de tip received in ultimele days zile, peste minAmount
+    public decimal MaxRecentReceivedAbove(decimal minAmount, int days) =>
+        RecentReceivedAbove(minAmount, days)
+            .Select(t => t.Amount)
+            .DefaultIfEmpty(0) //daca nu exista tranzactii, returneaza 0
+            .Max();
+
+    //returneaza data tranzactiei cu suma maxima care indeplineste conditiile
+    public DateTime MaxRecentReceivedDate(decimal minAmount, int days)
+    {
+        TransactionInfo? tx = RecentReceivedAbove(minAmount, days)
+            .OrderByDescending(t => t.Amount)
+            .ThenByDescending(t => t.Date)
+            .FirstOrDefault();
+        return tx?.Date ?? default;
+    }
 
 }
 

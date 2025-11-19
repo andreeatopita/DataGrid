@@ -10,11 +10,13 @@ namespace DataGridLib.Export;
 public class AsciiExporter : IGridExporter
 {
     public string Extension => "txt";
+
     public void Export(IReadOnlyList<string> headers, IReadOnlyList<string[]> rows, string filePath, GridPage? pageExp = null)
     {
         // calc widths
         int colCount = headers.Count;
         int[] widths = new int[colCount];
+
         for (int i = 0; i < colCount; i++)
         {
             int maxCell = rows.Count == 0 ? 0 : rows.Max(r => r[i].Length);
@@ -35,7 +37,8 @@ public class AsciiExporter : IGridExporter
         for (int i = 0; i < colCount; i++)
         {
             w.Write(headers[i].PadRight(widths[i]));
-            if (i < colCount - 1) w.Write(" | ");
+            if (i < colCount - 1) 
+                w.Write(" | ");
         }
         w.WriteLine();
 
@@ -49,7 +52,9 @@ public class AsciiExporter : IGridExporter
             for (int i = 0; i < colCount; i++)
             {
                 w.Write(row[i].PadRight(widths[i]));
-                if (i < colCount - 1) w.Write(" | ");
+
+                if (i < colCount - 1) 
+                    w.Write(" | ");
             }
             w.WriteLine();
         }

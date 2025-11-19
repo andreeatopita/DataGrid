@@ -24,4 +24,17 @@ public static class StudentFinancialExtensions
             Console.WriteLine("Amount must be greater than zero.\n");
         }
     }
+
+    public static void ReceiveSafe(this Student s, decimal amount, DateTime? date = null)
+    {
+        try
+        {
+            s.ReceiveMoney(amount, date);
+            Console.WriteLine($"Received {amount}. New balance: {s.AccountBalance}.\n");
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("Amount must be greater than zero.\n");
+        }
+    }
 }

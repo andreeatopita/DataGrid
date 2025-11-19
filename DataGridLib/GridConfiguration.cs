@@ -23,7 +23,7 @@ public class GridConfiguration<T> : IGridConfiguration<T>
 
     public GridConfiguration<T> EnablePagination(int pageSize)
     {
-        if(pageSize<=0)
+        if(pageSize<0)
         {
             throw new ArgumentException("Page size must be greater than zero.");
         }
@@ -47,6 +47,7 @@ public class GridConfiguration<T> : IGridConfiguration<T>
         //prev - pentru a pastra vechea functie, o incapsulez intr o variabila
         //apoi creez o noua functie care aplica vechea functie si apoi filtreaza cu where
         Func<IEnumerable<T>, IEnumerable<T>> prev = queryModifier;
+
         queryModifier = items => prev(items).Where(predicate);
         return this;
     }

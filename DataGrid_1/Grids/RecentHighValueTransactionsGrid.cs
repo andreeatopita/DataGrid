@@ -1,5 +1,4 @@
-﻿using DataGrid_1.AccountStructure;
-using DataGrid_1.Formatting;
+﻿using DataGrid_1.Formatting;
 using DataGrid_1.Formatting.Interfaces;
 using DataGridLib;
 using System;
@@ -53,32 +52,13 @@ public class RecentHighValueTransactionsGrid : IGridBuilder<Student>
 
     //verific daca studentul are tranzactii care indeplinesc conditiile
     private bool HasQualifying(Student s) =>
-        s.Account.Transactions.Any(t =>
-            t.Type == TransactionType.Received && //doar tranzactii de tip received
-            t.Amount > MinAmount && //suma mai mare decat MinAmount
-            t.Date >= DateTime.Now.AddDays(-Days)); //in ultimele Days zile
+       s.HasRecentReceivedAbove(MinAmount, Days);
 
     //returneaza suma maxima a tranzactiilor care indeplinesc conditiile
     private decimal MaxQualifyingAmount(Student s) =>
-        s.Account.Transactions
-            .Where(t => t.Type == TransactionType.Received &&
-                        t.Amount > MinAmount &&
-                        t.Date >= DateTime.Now.AddDays(-Days))
-            .Select(t => t.Amount)
-            .DefaultIfEmpty(0) //daca nu exista tranzactii, returneaza 0
-            .Max(); //returneaza val maxima
+        s.MaxRecentReceivedAbove(MinAmount, Days);
 
     //returneaza data tranzactiei cu suma maxima care indeplineste conditiile
-    private DateTime MaxQualifyingDate(Student s)
-    {
-        var tx = s.Account.Transactions
-            .Where(t => t.Type == TransactionType.Received &&
-                        t.Amount > MinAmount &&
-                        t.Date >= DateTime.Now.AddDays(-Days))
-            .OrderByDescending(t => t.Amount) //ordonez desc dupa suma
-            .ThenByDescending(t => t.Date) //desc dupa data
-            .FirstOrDefault(); //iau prima tranz sau null daca nu exista niciun element
-        return tx?.Date ?? default;
-        //daca tx nu e null iau tx.date , daca e null, rez e null => ?? default 
-    }
+    private DateTime MaxQualifyingDate(Student s) =>
+        s.MaxRecentReceivedDate(MinAmount, Days);
 }

@@ -4,7 +4,7 @@ namespace AccountLib;
 
 public class Account
 {
-    //nested class
+    //nested class: reprezinta o tranzactie in cont
     private class Transaction
     {
         public decimal Amount { get; }
@@ -12,6 +12,7 @@ public class Account
         public TransactionType Type { get; }
         public Transaction(decimal amount, DateTime date, TransactionType type)
         {
+            // validation
             Amount = amount;
             Date = date;
             Type = type;
@@ -19,25 +20,19 @@ public class Account
     }
 
 
-    private readonly List<Transaction> _transactions = new();
+    private List<Transaction> Transactions { get; } = new();
     
-    //sold = total intrari - total iesiri ( calculat din istoric)
-    //dinamic
-    //public decimal Balance =>
-    //    _transactions.Where(t => t.Type == TransactionType.Received).Sum(t => t.Amount) - _transactions.Where(t => t.Type == TransactionType.Spent).Sum(t => t.Amount);
-
-    //total incasari - total cheltuieli
     public decimal Balance =>
-        _transactions.Sum(t => t.Type == TransactionType.Received ? t.Amount : -t.Amount);
+        Transactions.Sum(t => t.Type == TransactionType.Received ? t.Amount : -t.Amount);
 
     //optional date : daca nu e specificata, se pune data curenta
     //receive - primeste bani in cont
     public void Receive(decimal amount, DateTime? date = null)
     {
         if (amount <= 0)
-            throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be greater than zero.");
+            throw new ArgumentOutOfRangeException("Amount must be greater than zero.");
 
-        _transactions.Add(new Transaction(amount, Normalize(date), TransactionType.Received));
+        Transactions.Add(new Transaction(amount, Normalize(date), TransactionType.Received));
     }
 
 
@@ -45,12 +40,12 @@ public class Account
     public void Spend(decimal amount, DateTime? date = null)
     {
         if (amount <= 0)
-            throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be greater than zero.");
+            throw new ArgumentOutOfRangeException("Amount must be greater than zero.");
 
         if (amount > Balance)
             throw new InvalidOperationException($"Insufficient funds. Balance={Balance}, spend={amount}");
 
-        _transactions.Add(new Transaction(amount, Normalize(date), TransactionType.Spent));
+        Transactions.Add(new Transaction(amount, Normalize(date), TransactionType.Spent));
     }
 
 
@@ -60,5 +55,28 @@ public class Account
                 (date == null) ? DateTime.Now : date.Value;
 
 
-    //safe read only get transactions
+
+    //iau tranzactiile si le transform in TransactionInfo
+    //ienumerable: pt citire, ret doar valorile din trans info, citit, nu modificat
+    public IEnumerable<TransactionInfo> GetTransactions() => Transactions
+        .Select(t => new TransactionInfo (t.Amount, t.Date, t.Type));
+
+    //get received 
+    public IEnumerable<TransactionInfo> GetReceived() => Transactions
+        .Where(t => t.Type == TransactionType.Received)
+        .Select(t => new TransactionInfo (t.Amount, t.Date, t.Type));
+
+    public IEnumerable<TransactionInfo> GetSpent() => Transactions
+        .Where(t => t.Type == TransactionType.Spent)
+        .Select(t=> new TransactionInfo(t.Amount,t.Date,t.Type));
+
+    //get pentru o anumita data 
+    public IEnumerable<TransactionInfo> GetSince(DateTime cutoff) =>
+        Transactions.Where(t => t.Date >= cutoff)
+                     .Select(t => new TransactionInfo(t.Amount, t.Date, t.Type));
+
+    //get pentru recent received 
+    public IEnumerable<TransactionInfo> GetRecentReceivedAbove(decimal minAmount, int days) => Transactions
+        .Where(t => t.Type == TransactionType.Received && t.Amount > minAmount && t.Date >= DateTime.Now.AddDays(-days))
+                     .Select(t => new TransactionInfo(t.Amount, t.Date, t.Type));
 }

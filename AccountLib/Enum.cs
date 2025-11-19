@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AccountLib;
 
-internal enum TransactionType
+public enum TransactionType
 {
     Received,
     Spent

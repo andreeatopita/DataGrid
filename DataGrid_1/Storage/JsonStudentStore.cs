@@ -41,7 +41,7 @@ public class JsonStudentStore : IJsonStudentStore
             var result = new List<Student>();
             foreach (var d in dtos)
             {
-                // construiesc student fara balans initial (se reconstruieste din tranzactii)
+                //construiesc student fara balance initial (se reconstruieste din tranzactii)
                 var s = new Student(
                     id: d.StudentId,
                     firstName: d.FirstName,
@@ -126,7 +126,7 @@ public class JsonStudentStore : IJsonStudentStore
         DateOfBirth = s.DateOfBirth,
         LastActiveAt = s.LastActiveAt,
         IsActive = s.IsActive,
-        Transactions = s.Account.Transactions
+        Transactions = s.AllTransactions()
         .Select(tr => new TransactionDto
         {
             Amount = tr.Amount,
