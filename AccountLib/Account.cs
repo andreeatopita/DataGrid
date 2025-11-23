@@ -12,7 +12,7 @@ public class Account
         public TransactionType Type { get; }
         public Transaction(decimal amount, DateTime date, TransactionType type)
         {
-            // validation
+            // validation aici 
             Amount = amount;
             Date = date;
             Type = type;
@@ -27,12 +27,12 @@ public class Account
 
     //optional date : daca nu e specificata, se pune data curenta
     //receive - primeste bani in cont
-    public void Receive(decimal amount, DateTime? date = null)
+    public void Receive(decimal amount)
     {
         if (amount <= 0)
             throw new ArgumentOutOfRangeException("Amount must be greater than zero.");
 
-        Transactions.Add(new Transaction(amount, Normalize(date), TransactionType.Received));
+        Transactions.Add(new Transaction(amount, DateTime.Now, TransactionType.Received));
     }
 
 
@@ -45,7 +45,7 @@ public class Account
         if (amount > Balance)
             throw new InvalidOperationException($"Insufficient funds. Balance={Balance}, spend={amount}");
 
-        Transactions.Add(new Transaction(amount, Normalize(date), TransactionType.Spent));
+        Transactions.Add(new Transaction(amount, DateTime.Now, TransactionType.Spent));
     }
 
 
@@ -79,4 +79,28 @@ public class Account
     public IEnumerable<TransactionInfo> GetRecentReceivedAbove(decimal minAmount, int days) => Transactions
         .Where(t => t.Type == TransactionType.Received && t.Amount > minAmount && t.Date >= DateTime.Now.AddDays(-days))
                      .Select(t => new TransactionInfo(t.Amount, t.Date, t.Type));
+
+
+    //pentru incarcare istoric din json 
+    //reface tranzactiile exact cu datele din lor 
+    public void Replay(IEnumerable<TransactionInfo> history)
+    {
+        foreach (TransactionInfo? h in history.OrderBy(t => t.Date))
+        {
+            if (h.Amount <= 0) 
+                throw new ArgumentOutOfRangeException("Amount must be > 0");
+
+            if (h.Type == TransactionType.Received)
+            {
+                Transactions.Add(new Transaction(h.Amount, h.Date, TransactionType.Received));
+            }
+            else 
+            {
+                if (h.Amount > Balance)
+                    throw new InvalidOperationException("Inconsistent history: spent > balance during replay.");
+
+                Transactions.Add(new Transaction(h.Amount, h.Date, TransactionType.Spent));
+            }
+        }
+    }
 }

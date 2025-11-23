@@ -4,23 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataGridLib;
+namespace DataGridLib.DataGrid;
 
 internal class PageNavigation
 {
-    public int PageSize { get; set; }
-    public int CurrentPage { get; set; }
-    
+    //sa citesc pagesize-ul din config
+    private Func<int> PageSizeGetter { get; }
+    //ultimul pagesize pentru detectare schimbari
+    private int lastPageSize;
+    //total petntru calcul pagini
+    private int totalItems;    
 
+
+    public int PageSize => PageSizeGetter();
+    //porneste de la 1 cand paginarea e activata 
+    public int CurrentPage { get; private set; } = 1;
     public bool Enabled => PageSize > 0;
 
-    //numarul total de iteme folosit la calculul paginilor
-    private int totalItems;
-    
-    public int TotalPages => TotalPagesMeth(totalItems);
+    public int TotalPages => TotalPagesMethod(totalItems);
 
     //calculez total pagini din total items
-    public int TotalPagesMeth(int totalItems)
+    public int TotalPagesMethod(int totalItems)
     {
         if (!Enabled)
         {
@@ -31,20 +35,11 @@ internal class PageNavigation
     }
 
 
-    public PageNavigation(int pageSize)
+    public PageNavigation(Func<int> pageSizeProvider)
     {
-        SetPageSize(pageSize);
-    }
-
-    public void SetPageSize(int pageSize)
-    {
-        if (pageSize < 0)
-        {
-            throw new ArgumentException("Page size must be greater than zero.");
-        }
-
-        PageSize = pageSize;
-        CurrentPage = 1; //reset to first page
+        PageSizeGetter= pageSizeProvider;
+        //valoarea curenta din config
+        lastPageSize = PageSize;
     }
 
     //metoda care actualizeaza total items, adica cate iteme sunt in total
@@ -57,8 +52,15 @@ internal class PageNavigation
 
         this.totalItems = totalItems;
 
+        //daca schimb page size, resetez pagina curenta la 1
+        if (PageSize != lastPageSize)
+        {
+            lastPageSize = PageSize;
+            CurrentPage = 1;
+        }
+
         //daca pagina curenta e mai mare decat total pagini, setez pagina curenta la ultima pagina
-        if (CurrentPage > TotalPages)
+        if (Enabled && CurrentPage > TotalPages)
         {
             CurrentPage = TotalPages;
         }
@@ -85,13 +87,22 @@ internal class PageNavigation
     //navigation:
     public void FirstPage()
     {
-        if (Enabled)
-            CurrentPage = 1;
+        if (!Enabled) 
+        { 
+            Console.WriteLine("\nPagination is disabled.\n"); 
+            return; 
+        }
+
+        
+        CurrentPage = 1;
     }
 
 
     public void LastPage()
     {
+        if (!Enabled)
+            Console.WriteLine("\nPagination is disabled.\n");
+
         if (Enabled)
         {
             //setez pagina curenta la ultima pagina
@@ -101,6 +112,12 @@ internal class PageNavigation
 
     public void NextPage()
     {
+        if (!Enabled)
+        {
+            Console.WriteLine("\nPagination is not enabled.\n");
+            return;
+        }
+
         if (Enabled && CurrentPage < TotalPages)
         {
             CurrentPage++;
@@ -114,6 +131,12 @@ internal class PageNavigation
 
     public void PreviousPage()
     {
+        if (!Enabled)
+        {
+            Console.WriteLine("\nPagination is not enabled.\n");
+            return;
+        }
+
         //daca e paginare si nu sunt la prima pagina
         if (Enabled && CurrentPage > 1)
         {
@@ -127,18 +150,22 @@ internal class PageNavigation
 
     public void GoToPageNo(int pageNumber)
     {
-        if (Enabled)
+        if(!Enabled)
         {
-            //daca e valida, setez pagina curenta
-            if (pageNumber > 0 && pageNumber <= TotalPages)
-            {
-                CurrentPage = pageNumber;
-            }
-            else
-            {
-                CurrentPage = 1;
-                Console.WriteLine("\nInvalid page number. Going to first page.\n");
-            }
+            Console.WriteLine("\nPagination is not enabled.\n");
+            return;
+        }
+
+
+        //daca e valida, setez pagina curenta
+        if (pageNumber > 0 && pageNumber <= TotalPages)
+        {
+            CurrentPage = pageNumber;
+        }
+        else
+        {
+            CurrentPage = 1;
+            Console.WriteLine("\nInvalid page number. Going to first page.\n");
         }
     }
 }

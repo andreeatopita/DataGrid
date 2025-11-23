@@ -1,4 +1,6 @@
-﻿namespace DataGridLib.Interfaces;
+﻿using DataGridLib.DataGrid;
+
+namespace DataGridLib.DataGrid.Interfaces;
 
 public interface IGridConfiguration<T>
 {

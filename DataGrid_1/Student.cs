@@ -60,11 +60,12 @@ public class Student
         //daca lastactiveat e default, pun data curenta, altfel pun ce am primit
         //LastActiveAt = lastActiveAt== default ? DateTime.Now : lastActiveAt;
 
-        LastActiveAt = LastActiveAt = lastActiveAt ?? DateTime.Now;
+        //daca e null, now
+        LastActiveAt = lastActiveAt ?? DateTime.Now;
 
 
         if (initialBalance>0)
-            Account.Receive(initialBalance, DateTime.Now); // tranzactie
+            Account.Receive(initialBalance); // tranzactie
     }
 
     public Student() :this(0,string.Empty,string.Empty,default,false) {}
@@ -101,8 +102,8 @@ public class Student
 
 
     //adaugare bani:
-    public void ReceiveMoney(decimal amount, DateTime? date=null) => Account.Receive(amount, date);
-    public void SpendMoney(decimal amount, DateTime? date=null) => Account.Spend(amount, date);
+    public void ReceiveMoney(decimal amount) => Account.Receive(amount);
+    public void SpendMoney(decimal amount) => Account.Spend(amount);
 
 
     //metode legate de account:
@@ -114,6 +115,8 @@ public class Student
     public IEnumerable<TransactionInfo> SpentTransactions() => Account.GetSpent();
 
     public IEnumerable<TransactionInfo> RecentReceivedAbove(decimal minAmount, int days) => Account.GetRecentReceivedAbove(minAmount, days);
+    public void LoadHistory(IEnumerable<TransactionInfo> history) => Account.Replay(history);
+
 
     //metoda bool pentru a verifica daca exista tranzactii de tip received 
     public bool HasRecentReceivedAbove(decimal minAmount, int days) =>
@@ -135,6 +138,8 @@ public class Student
             .FirstOrDefault();
         return tx?.Date ?? default;
     }
+
+
 
 }
 

@@ -1,7 +1,6 @@
-﻿using DataGridLib.Interfaces;
+﻿using DataGridLib.DataGrid.Interfaces;
 
-
-namespace DataGridLib;
+namespace DataGridLib.DataGrid;
 
 public class Row : IRow
 {

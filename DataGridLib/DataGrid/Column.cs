@@ -1,6 +1,6 @@
-﻿using DataGridLib.Interfaces;
+﻿using DataGridLib.DataGrid.Interfaces;
 
-namespace DataGridLib;
+namespace DataGridLib.DataGrid;
 
 //o coloana din grid pentru un tip de rand T si o proprietate TProp ( student si nume, varsta)
 public class Column<T, TProp> : IColumn<T>

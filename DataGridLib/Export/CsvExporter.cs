@@ -21,7 +21,7 @@ public class CsvExporter : IGridExporter
             if (pageExp != null)
             {
                 var c = pageExp;
-                writer.WriteLine($"# Page {c.CurrentPage}/{c.TotalPages} | PageSize={c.PageSize} | ItemsOnPage={rows.Count} | TotalItems={c.TotalItems}");
+                writer.WriteLine($"Page {c.CurrentPage}/{c.TotalPages} | PageSize={c.PageSize} | ItemsOnPage={rows.Count} | TotalItems={c.TotalItems}");
             }
 
 

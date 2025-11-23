@@ -5,26 +5,29 @@
 using DataGrid_1;
 using DataGrid_1.Formatting;
 using DataGrid_1.Grids;
-using DataGrid_1.Storage;
-using DataGridLib;
 using System.Globalization;
 using System.Text;
 using DataGrid_1.Export;
 using DataGridLib.Export;
 using DataGridLib.Export.Interfaces;
+using DataGridLib.DataGrid;
+using DataGrid_1.Repository;
 
 Console.OutputEncoding = Encoding.UTF8;
 
+//students.json: build in bin , cand se salveaza, modificare fisierul 
 
 // incarc datele din fisier 
-string jsonPath = Path.Combine(AppContext.BaseDirectory, "students.json");
+string jsonPath = Path.Combine(AppContext.BaseDirectory, "Data","students.json");
 Console.WriteLine($"JSON path: {jsonPath}");
 
+
 //creare store care gest citirea/scrierea json la calea respectiva 
-JsonStudentStore store = new JsonStudentStore(jsonPath);
+var repo = new JsonStudentRepo(jsonPath);
 
 //citeste fisierul json si returneaza lista de studenti, daca nu ex fis, returneaza lista goala
-List<Student> students = store.Load();
+List<Student> students = (await repo.LoadAsync()).ToList();
+
 
 Console.WriteLine($"Loaded {students.Count} students from JSON.");
 
@@ -126,34 +129,6 @@ Console.WriteLine();
 */
 
 
-
-//update student
-//am private set pe proprietati si nu pot modifica direct un obiect existent, deci adaug metode
-
-/*
-var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 8);
-if (studentToUpdate != null)
-{
-    studentToUpdate.ReceiveMoney(500,new DateTime(2024,1,2);
-    studentToUpdate.UpdateFatherName("Noad");
-    studentToUpdate.Deactivate();
-    //studentToUpdate.SpendMoneySafe(1000);
-
-    if (store.Save(students))
-    {
-        Console.WriteLine("Student updated and saved to JSON.");
-    }
-    else
-    {
-        Console.WriteLine("Failed to save updated student to JSON.");
-    }
-}
-else
-{
-    Console.WriteLine("Student not found for update.");
-}
-*/
-
 Console.WriteLine();
 Console.WriteLine("--Students_After_Updating_Student--");
 gridA.Display();
@@ -197,42 +172,6 @@ DataGrid<Student> recentHighGrid = new DataGrid<Student>(recentHighCfg, dataSour
 recentHighGrid.Display();
 
 
-//EX 6 : paginare 
-
-//pornesc paginarea :
-cfg.EnablePagination(1);
-//gridA.EnablePagination(1);  
-
-Console.WriteLine("\n-- Page 1 (after EnablePagination) --\n");
-gridA.Display();
-
-Console.WriteLine("\n-- NextPage --\n");
-gridA.Next();
-gridA.Display();
-
-Console.WriteLine("\n-- GotToPage5 --\n");
-gridA.GoToPage(3);
-gridA.Display();
-
-
-Console.WriteLine("\n-- Previous Page --\n");
-gridA.Previous();
-gridA.Display();
-
-Console.WriteLine("\n-- LastPage --\n");
-gridA.Last();
-gridA.Display();
-
-
-Console.WriteLine("\n-- FirstPage --\n");
-gridA.First();
-gridA.Display();
-
-Console.WriteLine("\n-- ChangePageSize --\n");
-gridA.ChangePageSize(5);
-gridA.Display();
-
-
 //export in format
 
 //EX 4 export datagrid to csv or xml
@@ -252,27 +191,20 @@ else
     gridA.ExportDataGrid(export);
 }
 
-cfg.DisablePagination();
 gridA.Display();
 
 
 //ex5: receive si spend
 
-var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 11);
+var studentToUpdate = students.FirstOrDefault(s => s.StudentId == 12);
 if (studentToUpdate != null)
 {
-    studentToUpdate.ReceiveSafe(4500,new DateTime(2024,1,2));
-    studentToUpdate.SpendMoneySafe(1000,new DateTime(2024,1,2));
+    studentToUpdate.ReceiveSafe(4500);
+    studentToUpdate.SpendMoneySafe(1000);
 
+    await repo.SaveAsync(students);
+    Console.WriteLine("Student updated and saved to JSON.");
 
-    if (store.Save(students))
-    {
-        Console.WriteLine("Student updated and saved to JSON.");
-    }
-    else
-    {
-        Console.WriteLine("Failed to save updated student to JSON.");
-    }
 }
 else
 {
@@ -284,13 +216,42 @@ Console.WriteLine("--Students_After_Updating_Student--");
 gridA.Display();
 
 
-cfg.EnablePagination(3);
-Console.WriteLine("\n--Paginated View After Transactions--\n");
+//EX 6 : paginare 
+
+//pornesc paginarea :
+cfg.EnablePagination(6);
+
+Console.WriteLine("\n-- Page 1 (after EnablePagination) --\n");
 gridA.Display();
 
+Console.WriteLine("\n-- NextPage --\n");
+gridA.Next();
+gridA.Display();
 
-Console.WriteLine("\n-- GotToPage4 --\n");
+Console.WriteLine("\n-- GotToPage5 --\n");
 gridA.GoToPage(99);
 gridA.Display();
 
+Console.WriteLine("\n-- Previous Page --\n");
+gridA.Previous();
+gridA.Display();
+
+Console.WriteLine("\n-- LastPage --\n");
+gridA.Last();
+gridA.Display();
+
+Console.WriteLine("\n-- FirstPage --\n");
+gridA.First();
+gridA.Display();
+
+Console.WriteLine("\n-- ChangePageSize --\n");
+gridA.ChangePageSize(3);
+gridA.Display();
+
+cfg.DisablePagination();
+Console.WriteLine("\n-- Pagination Disabled --\n");
+gridA.Display();
+
+
+//sa vad daca da export paginat 
 gridA.ExportDataGrid(new CsvExporter());

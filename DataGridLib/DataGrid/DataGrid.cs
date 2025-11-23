@@ -1,23 +1,19 @@
 ﻿using DataGrid_1.Export;
+using DataGridLib.DataGrid.Interfaces;
 using DataGridLib.Export;
 using DataGridLib.Export.Interfaces;
-using DataGridLib.Interfaces;
 
-namespace DataGridLib;
+namespace DataGridLib.DataGrid;
 
 //orchestrator care ia datele, aplica config( coloane, filtru, numerotare randuri) 
 public class DataGrid<T>
 {
     private GridConfiguration<T> Configuration { get; }
     private GridDataSource<T> DataSource { get; }
-
     private PageNavigation Nav { get; }
 
     //coloanele 
     private List<IColumn<T>>? LastDisplayedCols;
-
-    private int LastPage;
-    
 
     //cel putin o coloana si fiecare un header valid 
     public DataGrid(GridConfiguration<T> Configuration, GridDataSource<T> DataSource)
@@ -28,19 +24,9 @@ public class DataGrid<T>
 
 
         //porneste de la pagina1
-        Nav = new PageNavigation(Configuration.PageSize);
-        
+        //transmit acel func care citeste din config valoarea actuala a pag size
+        Nav = new PageNavigation(() => Configuration.PageSize);
     }
-
-    //private void SyncPageSize()
-    //{
-    //    if (Configuration.PageSize != LastPageSize)
-    //    {
-    //        Nav.SetPageSize(Configuration.PageSize);
-    //        LastPageSize = Configuration.PageSize;
-    //    }
-    //}
-
 
     //ia toate itemele, aplica filtru si ordonare
     private IEnumerable<T> OrderedItems()
@@ -53,14 +39,12 @@ public class DataGrid<T>
     public void EnablePagination(int pageSize)
     {
         Configuration.EnablePagination(pageSize);
-        Nav.SetPageSize(pageSize);
     }
 
-    //dazactivez si setez pagina size 0
+    //dazactivez
     public void DisablePagination()
     {
         Configuration.DisablePagination();
-        Nav.SetPageSize(0);
     }
 
     //dau enable si dupa setez la pagina pe care o zic
@@ -128,8 +112,6 @@ public class DataGrid<T>
     {
         //pt fiecare item din items aplica,in ordine: pt # ia s.studentid si conv la string , si le pune intr un string[] si construieste un row
         //row[0] = "1", "danie","yes"... 
-
-        //SyncPageSize();
 
         //iau itemele ordonate si filtrate
         IEnumerable<T> ordered = OrderedItems();
@@ -231,7 +213,6 @@ public class DataGrid<T>
         if (exporter == null) 
             throw new ArgumentNullException("Exporter null.");
 
-        //SyncPageSize();
 
         string path = Path.Combine(AppContext.BaseDirectory, $"std_export.{exporter.Extension}");
 

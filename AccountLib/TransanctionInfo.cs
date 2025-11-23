@@ -8,6 +8,7 @@ namespace AccountLib;
 
 //tranzactie catre utilizator
 //record: immutable by default, 
+
 public record TransactionInfo(
    decimal Amount,
    DateTime Date,

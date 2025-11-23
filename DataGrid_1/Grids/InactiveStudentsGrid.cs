@@ -1,10 +1,11 @@
-﻿using DataGridLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DataGrid_1.Formatting;
+using DataGrid_1.Grids.Interfaces;
+using DataGridLib.DataGrid;
 
 
 namespace DataGrid_1.Grids;

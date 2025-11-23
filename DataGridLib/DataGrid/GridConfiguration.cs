@@ -1,11 +1,11 @@
-﻿using DataGridLib.Interfaces;
+﻿using DataGridLib.DataGrid.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataGridLib;
+namespace DataGridLib.DataGrid;
 
 //tipul de entitate pe care il afiseaza grila: student,....
 public class GridConfiguration<T> : IGridConfiguration<T>

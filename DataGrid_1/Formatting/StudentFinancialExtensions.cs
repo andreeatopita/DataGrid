@@ -8,11 +8,11 @@ namespace DataGrid_1.Formatting;
 
 public static class StudentFinancialExtensions
 {
-    public static void SpendMoneySafe(this Student s, decimal amount, DateTime? date = null)
+    public static void SpendMoneySafe(this Student s, decimal amount)
     {
         try
         {
-            s.SpendMoney(amount, date);
+            s.SpendMoney(amount);
             Console.WriteLine($"Spent {amount}. New balance: {s.AccountBalance}.\n");
         }
         catch (InvalidOperationException)
@@ -25,11 +25,11 @@ public static class StudentFinancialExtensions
         }
     }
 
-    public static void ReceiveSafe(this Student s, decimal amount, DateTime? date = null)
+    public static void ReceiveSafe(this Student s, decimal amount)
     {
         try
         {
-            s.ReceiveMoney(amount, date);
+            s.ReceiveMoney(amount);
             Console.WriteLine($"Received {amount}. New balance: {s.AccountBalance}.\n");
         }
         catch (ArgumentOutOfRangeException)

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DataGridLib.Interfaces;
+using DataGridLib.DataGrid;
+using DataGridLib.DataGrid.Interfaces;
 
 namespace DataGridLib.Export;
 

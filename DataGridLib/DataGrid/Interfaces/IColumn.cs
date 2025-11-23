@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DataGridLib;
-namespace DataGridLib.Interfaces;
+using DataGridLib.DataGrid;
+namespace DataGridLib.DataGrid.Interfaces;
 public interface IColumn<T>
 {
     string Header { get; }

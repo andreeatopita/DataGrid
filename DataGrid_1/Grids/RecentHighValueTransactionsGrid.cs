@@ -1,6 +1,7 @@
 ﻿using DataGrid_1.Formatting;
 using DataGrid_1.Formatting.Interfaces;
-using DataGridLib;
+using DataGrid_1.Grids.Interfaces;
+using DataGridLib.DataGrid;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

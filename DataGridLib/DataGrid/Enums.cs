@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataGridLib;
+namespace DataGridLib.DataGrid;
 
 //enum pentru alinierea textului in coloana, cum sa asez textul in celula
 public enum Alignment
