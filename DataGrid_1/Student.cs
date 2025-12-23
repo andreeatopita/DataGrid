@@ -15,7 +15,7 @@ public class Student
 
     //optional numele tatalui, poate fi null
     public string? FatherName { get; private set; } 
-    //dateonly?
+    //dateonly? datetimeoffset
     public DateTime DateOfBirth { get; private set; }
     public DateTime LastActiveAt { get; private set; }
     //sold cont - dinamic, preia din account
@@ -138,8 +138,6 @@ public class Student
             .FirstOrDefault();
         return tx?.Date ?? default;
     }
-
-
 
 }
 

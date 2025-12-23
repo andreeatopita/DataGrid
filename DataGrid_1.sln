@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataGridLib", "DataGridLib\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountLib", "AccountLib\AccountLib.csproj", "{AA5FBB41-EDAE-41B0-B984-85C548A50F46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackofficeConsole", "BackofficeConsole\BackofficeConsole.csproj", "{FEE1D747-F15C-42AA-9BA2-1A4E4BE11EBC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,10 @@ Global
 		{AA5FBB41-EDAE-41B0-B984-85C548A50F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA5FBB41-EDAE-41B0-B984-85C548A50F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA5FBB41-EDAE-41B0-B984-85C548A50F46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEE1D747-F15C-42AA-9BA2-1A4E4BE11EBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEE1D747-F15C-42AA-9BA2-1A4E4BE11EBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEE1D747-F15C-42AA-9BA2-1A4E4BE11EBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEE1D747-F15C-42AA-9BA2-1A4E4BE11EBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

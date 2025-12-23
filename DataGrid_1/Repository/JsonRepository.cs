@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using DataGrid_1.Repository.Dto;
 using AccountLib;
+using DataGrid_1.Repository.Dtos.Json;
 
 namespace DataGrid_1.Repository;
 
 
-public class JsonStudentRepo : IJsonRepo<Student>
+public class JsonRepository : IRepository<Student>
 {
     private readonly string filePath;
     
@@ -22,7 +22,7 @@ public class JsonStudentRepo : IJsonRepo<Student>
     //static - shared intre toate instantele clasei
     private static readonly SemaphoreSlim semaphore = new(1, 1);
 
-    public JsonStudentRepo(string path)
+    public JsonRepository(string path)
     {
         filePath = path;
     }
@@ -132,7 +132,7 @@ public class JsonStudentRepo : IJsonRepo<Student>
             semaphore.Release();
         }
     }
-    //sava : entity -> dto -> serialize json 
+    //save : entity -> dto -> serialize json 
 
     //serializare pt json
     //iau student( account privat ) si in transform in dto ( cu lista de tranzactii publice )
@@ -169,6 +169,4 @@ public class JsonStudentRepo : IJsonRepo<Student>
         return s;
     }
 }
-
-//task: 
 

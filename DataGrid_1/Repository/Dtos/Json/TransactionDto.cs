@@ -6,9 +6,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace DataGrid_1.Repository.Dto;
+namespace DataGrid_1.Repository.Dtos.Json;
 
-public record TransactionDto(
+internal record TransactionDto(
     decimal Amount,
     DateTime Date,
     [property: JsonConverter(typeof(JsonStringEnumConverter))]

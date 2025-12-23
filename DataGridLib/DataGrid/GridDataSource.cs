@@ -5,8 +5,35 @@ namespace DataGridLib.DataGrid;
 //
 public class GridDataSource<T> : IGridDataSource<T>
 {
-    //lista de date, IEnumerable pentru a putea folosi orice colectie 
+    //nu lista=> trb repository
+    //DataSource<IRepository<T>> in loc de IEnumerable<T>
+    //Datagrid<cconfig, Irepository<T>> : unde irepository e JsonRepository, SqlRepository etc
+
+    //problema: 
+    //1 -> t = student/inactive student/ etc = alte tipuri de obiecte
+    //aici fac partea asta in care nu extrag toate datele din BD, ci doar ce imi trebuie
+    // cred? - aici in aplicatie acel query(apply) ca sa extreg doar ce imi trebuie
+
+    //2-> fiecare repository in parte are si logica de " ce date am nevoie" -> JsonRepositoryStudentInactive , cred?
+    //adica fiecare repository implementeaza logica de filtrare a datelor, cred, acel query integrat in el
+
+    //ambele au nevoie de obiecte si dto : problema e unde aplic logica de filtrare a datelor
+
+
     private IEnumerable<T> Data { get; }
+    // aici ar trebui sa arate asa constructorul
+    //public gridatasource(irepository<t> repo) , si data source alege SURSA DATELOR 
+    //filtrarea datelor practic ar trebui sa ramana aici, cum am mai jos 
+
+    //am un datagrid cu configuratie si sursa datelor, pe configuratie aplic de exemplu Where, si aici in Datasource aplic si obtin datele filtrate
+
+
+
+
+
+
+
+
 
     //constructor care primeste o colectie de elemente de tip T, le atribuie proprietatii Data
     public GridDataSource(IEnumerable<T> data)

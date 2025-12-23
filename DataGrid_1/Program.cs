@@ -23,7 +23,7 @@ Console.WriteLine($"JSON path: {jsonPath}");
 
 
 //creare store care gest citirea/scrierea json la calea respectiva 
-var repo = new JsonStudentRepo(jsonPath);
+var repo = new JsonRepository(jsonPath);
 
 //citeste fisierul json si returneaza lista de studenti, daca nu ex fis, returneaza lista goala
 List<Student> students = (await repo.LoadAsync()).ToList();
