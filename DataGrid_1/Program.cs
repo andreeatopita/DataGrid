@@ -1,7 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-
-
 using DataGrid_1;
 using DataGrid_1.Formatting;
 using DataGrid_1.Grids;
@@ -12,24 +10,40 @@ using DataGridLib.Export;
 using DataGridLib.Export.Interfaces;
 using DataGridLib.DataGrid;
 using DataGrid_1.Repository;
+using DataGridLib.Contracts;
+using Microsoft.Extensions.Configuration;
 
 Console.OutputEncoding = Encoding.UTF8;
 
-//students.json: build in bin , cand se salveaza, modificare fisierul 
+
+Console.WriteLine("Choose data source: 1-JSON, 2 -SQL");
+string? sourceChoice=Console.ReadLine();
+
 
 // incarc datele din fisier 
 string jsonPath = Path.Combine(AppContext.BaseDirectory, "Data","students.json");
+
+var config= new ConfigurationBuilder().SetBasePath(AppContext.BaseDirectory)
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .Build();
+
+string cs = config.GetConnectionString("Default") ?? throw new InvalidOperationException("Connection string not found.");
+
 Console.WriteLine($"JSON path: {jsonPath}");
+Console.WriteLine($"JSON path: {cs}");
 
 
-//creare store care gest citirea/scrierea json la calea respectiva 
-var repo = new JsonRepository(jsonPath);
+IRepository<Student> repo = sourceChoice switch
+{
+    "1" => new JsonRepository(jsonPath),  
+    "2" => new SqlRepository(cs),
+    _ => new JsonRepository(jsonPath), //default JSON
+};
 
-//citeste fisierul json si returneaza lista de studenti, daca nu ex fis, returneaza lista goala
-List<Student> students = (await repo.LoadAsync()).ToList();
+//incarcare studentii din repo
+IReadOnlyList<Student> students = await repo.LoadAsync();
 
-
-Console.WriteLine($"Loaded {students.Count} students from JSON.");
+Console.WriteLine($"Loaded {students.Count} students from {repo.GetType().Name}");
 
 var cfg = new GridConfiguration<Student>()
     .RowNumber(true) // coloana cu nr randului
@@ -46,21 +60,21 @@ var cfg = new GridConfiguration<Student>()
 
 Console.WriteLine("--Students--");
 
-GridDataSource<Student> dataSourceA = new GridDataSource<Student>(students);
+GridDataSource<Student> dataSourceA = new GridDataSource<Student>(repo);
 var gridA= new DataGrid<Student>(cfg, dataSourceA);
 
-gridA.Display();
+await gridA.DisplayAsync();
 Console.WriteLine();
 
 
 Console.WriteLine("--Students_Partial--");
-gridA.Display("Id", "Name", "Active");
+await gridA.DisplayAsync("Id", "Name", "Active");
 Console.WriteLine();
 
 Console.WriteLine("--Students_Active_Only_LastName--");
 cfg.Where(s => s.IsActive)
     .OrderBy(s => s.LastName);
-gridA.Display();
+await gridA.DisplayAsync();
 Console.WriteLine();
 
 
@@ -68,14 +82,14 @@ Console.WriteLine();
 cfg.ResetQuery();
 Console.WriteLine("--Students_Ordered_by_LastName--");
 cfg.OrderBy(s => s.LastName);
-gridA.Display();
+await gridA.DisplayAsync();
 Console.WriteLine();
 
 //subset de randuri, skip : sare peste primele n randuri
 cfg.ResetQuery(); //resetez filtrarea, ordonarea, skip, take
 cfg.Skip(2);
 Console.WriteLine("--Students_Skip_2--");
-gridA.Display();
+await gridA.DisplayAsync();
 Console.WriteLine();
 
 
@@ -83,7 +97,7 @@ Console.WriteLine();
 cfg.ResetQuery(); //resetez filtrarea, ordonarea, skip, take
 cfg.Take(5);
 Console.WriteLine("--Students_A_Take_5--");
-gridA.Display();
+await gridA.DisplayAsync();
 Console.WriteLine();
 
 cfg.ResetQuery(); //resetez filtrarea, ordonarea, skip, take
@@ -131,45 +145,45 @@ Console.WriteLine();
 
 Console.WriteLine();
 Console.WriteLine("--Students_After_Updating_Student--");
-gridA.Display();
+await gridA.DisplayAsync();
 
 
 //EX 2 studenti inactivi
 Console.WriteLine("\n--Students_Inactive--\n");
 GridConfiguration<Student> inactiveCfg = new InactiveStudentsGrid().Build();
 DataGrid<Student> inactiveGrid = new DataGrid<Student>(inactiveCfg, dataSourceA);
-inactiveGrid.Display();
+await inactiveGrid.DisplayAsync();
 
 //EX 3 studenti cu account balance >= 200 
 Console.WriteLine("\n--Students_Balance_Above_200_Default--\n");
 GridConfiguration<Student> balanceCfg = new StudentsByBalanceGrid().Build();
 DataGrid<Student> balanceGrid = new DataGrid<Student>(balanceCfg, dataSourceA);
-balanceGrid.Display();
+await balanceGrid.DisplayAsync();
 
 //EX 3 CULTURA
 Console.WriteLine("\n--Students_Balance_Above_200_RO_Culture--\n");
 GridConfiguration<Student> balanceCfgRO = new StudentsByBalanceGrid(new CultureInfo("ro-RO")).Build();
 DataGrid<Student> balanceGridRO = new DataGrid<Student>(balanceCfgRO, dataSourceA);
-balanceGridRO.Display();
+await balanceGridRO.DisplayAsync();
 
 //EX 3 sufix
 Console.WriteLine("\n--Students_Balance_Above_200_Custom_Suffix--\n");
 GridConfiguration<Student> balanceCfgCustom = new StudentsByBalanceGrid(new CultureInfo("fr-FR"), suffix: "Eur").Build();
 DataGrid<Student> balanceGridCustom = new DataGrid<Student>(balanceCfgCustom, dataSourceA);
-balanceGridCustom.Display();
+await balanceGridCustom.DisplayAsync();
 
 //ex 3 cu ja
 Console.WriteLine("\n--Students_Balance_Above_200_Custom_Prefix--\n");
 GridConfiguration<Student> balanceCfgJP = new StudentsByBalanceGrid(new CultureInfo("ja-JP")).Build();
 DataGrid<Student> balanceGridJP = new DataGrid<Student>(balanceCfgJP, dataSourceA);
-balanceGridJP.Display();
+await balanceGridJP.DisplayAsync();
 
 
 //EX 5
 Console.WriteLine("\n--Students_Recent_High_Value_Transactions--\n");
 GridConfiguration<Student> recentHighCfg = new RecentHighValueTransactionsGrid(culture: new CultureInfo("ro-RO")).Build();
 DataGrid<Student> recentHighGrid = new DataGrid<Student>(recentHighCfg, dataSourceA);
-recentHighGrid.Display();
+await recentHighGrid.DisplayAsync();
 
 
 //export in format
@@ -184,14 +198,14 @@ IGridExporter? export = factory.CreateExporter(choice);
 if (export == null)
 {
     Console.WriteLine("\n--ASCII_EXPORT--\n");
-    gridA.Display();
+    await gridA.DisplayAsync();
 }
 else
 {
-    gridA.ExportDataGrid(export);
+    await gridA.ExportDataGridAsync(export);
 }
 
-gridA.Display();
+await gridA.DisplayAsync();
 
 
 //ex5: receive si spend
@@ -202,9 +216,15 @@ if (studentToUpdate != null)
     studentToUpdate.ReceiveSafe(4500);
     studentToUpdate.SpendMoneySafe(1000);
 
-    await repo.SaveAsync(students);
-    Console.WriteLine("Student updated and saved to JSON.");
-
+    if(repo is JsonRepository jsonRepo)
+    {
+        await jsonRepo.SaveAsync(students);
+        Console.WriteLine("Student updated and saved to JSON.");
+    }
+    else
+    {
+        Console.WriteLine("Save only supported for JsonRepository");
+    }
 }
 else
 {
@@ -213,7 +233,7 @@ else
 
 Console.WriteLine();
 Console.WriteLine("--Students_After_Updating_Student--");
-gridA.Display();
+await gridA.DisplayAsync();
 
 
 //EX 6 : paginare 
@@ -222,36 +242,35 @@ gridA.Display();
 cfg.EnablePagination(6);
 
 Console.WriteLine("\n-- Page 1 (after EnablePagination) --\n");
-gridA.Display();
+await gridA.DisplayAsync();
 
 Console.WriteLine("\n-- NextPage --\n");
 gridA.Next();
-gridA.Display();
+await gridA.DisplayAsync();
 
 Console.WriteLine("\n-- GotToPage5 --\n");
 gridA.GoToPage(99);
-gridA.Display();
+await gridA.DisplayAsync();
 
 Console.WriteLine("\n-- Previous Page --\n");
 gridA.Previous();
-gridA.Display();
+await gridA.DisplayAsync();
 
 Console.WriteLine("\n-- LastPage --\n");
 gridA.Last();
-gridA.Display();
+await gridA.DisplayAsync();
 
 Console.WriteLine("\n-- FirstPage --\n");
 gridA.First();
-gridA.Display();
+await gridA.DisplayAsync();
+
+//sa vad daca da export paginat 
+await gridA.ExportDataGridAsync(new CsvExporter());
 
 Console.WriteLine("\n-- ChangePageSize --\n");
 gridA.ChangePageSize(3);
-gridA.Display();
+await gridA.DisplayAsync();
 
 cfg.DisablePagination();
 Console.WriteLine("\n-- Pagination Disabled --\n");
-gridA.Display();
-
-
-//sa vad daca da export paginat 
-gridA.ExportDataGrid(new CsvExporter());
+await gridA.DisplayAsync();

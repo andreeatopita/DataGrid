@@ -4,6 +4,6 @@ namespace DataGridLib.DataGrid.Interfaces;
 
 public interface IGridDataSource<T>
 {
-    IEnumerable<T> GetData(GridConfiguration<T>? config);
-    List<Row> ToRows(List<IColumn<T>> columns, GridConfiguration<T>? configuration = null);
+    Task<IEnumerable<T>> GetDataAsync(GridConfiguration<T>? config);
+    Task<List<Row>> ToRowsAsync(List<IColumn<T>> columns, GridConfiguration<T>? configuration = null);
 }

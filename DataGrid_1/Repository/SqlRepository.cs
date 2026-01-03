@@ -3,13 +3,14 @@ using DataGrid_1.Repository.Dtos.DB;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
+using DataGridLib.Contracts;
 
 namespace DataGrid_1.Repository;
 //aici:citirea din baza de date 
-public class DatabaseRepository : IRepository<Student>
+public class SqlRepository : IRepository<Student>
 {
     private readonly string connectionString;
-    public DatabaseRepository(string _connectionString) => connectionString = _connectionString;
+    public SqlRepository(string _connectionString) => connectionString = _connectionString;
 
     public async Task<IReadOnlyList<Student>> LoadAsync()
     {
@@ -35,6 +36,9 @@ public class DatabaseRepository : IRepository<Student>
 
         foreach(var r in rows)
         {
+            //iau balanta din dictionar pt fiecare student, daca nu, 0
+            balances.TryGetValue(r.StudentId, out decimal balance);
+
             //entitatea mea Student
             var s =new Student(
                 id: r.StudentId,
@@ -44,7 +48,7 @@ public class DatabaseRepository : IRepository<Student>
                 isActive: r.IsActive,
                 fatherName: r.FatherName,
                 lastActiveAt: r.LastActiveAt ?? default,
-                initialBalance: 0m 
+                initialBalance: balance 
                 );
             result.Add(s);
         }

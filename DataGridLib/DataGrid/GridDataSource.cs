@@ -1,8 +1,8 @@
-﻿using DataGridLib.DataGrid.Interfaces;
+﻿using DataGridLib.Contracts;
+using DataGridLib.DataGrid.Interfaces;
 
 namespace DataGridLib.DataGrid;
 
-//
 public class GridDataSource<T> : IGridDataSource<T>
 {
     //nu lista=> trb repository
@@ -20,45 +20,40 @@ public class GridDataSource<T> : IGridDataSource<T>
     //ambele au nevoie de obiecte si dto : problema e unde aplic logica de filtrare a datelor
 
 
-    private IEnumerable<T> Data { get; }
     // aici ar trebui sa arate asa constructorul
     //public gridatasource(irepository<t> repo) , si data source alege SURSA DATELOR 
     //filtrarea datelor practic ar trebui sa ramana aici, cum am mai jos 
 
     //am un datagrid cu configuratie si sursa datelor, pe configuratie aplic de exemplu Where, si aici in Datasource aplic si obtin datele filtrate
 
-
-
-
-
-
-
-
+    private IRepository<T> Repository { get; }
 
     //constructor care primeste o colectie de elemente de tip T, le atribuie proprietatii Data
-    public GridDataSource(IEnumerable<T> data)
+    public GridDataSource(IRepository<T> repository)
     {
-        Data = data;
+        Repository = repository;
     }
 
-    //pentru a obtine datele nemodificate
 
-    public IEnumerable<T> GetData(GridConfiguration<T>? config)
+    //iau datele, aplic config ul de grid(where, orderby)
+    public async Task<IEnumerable<T>> GetDataAsync(GridConfiguration<T>? config)
     {
+        //load din repository: json, sql, api
+        IReadOnlyList<T> data = await Repository.LoadAsync();
+
         //daca nu am config, returnez datele fara modificari
         if (config == null)
-            return Data;
+            return data;
         else
-            return config.Apply(Data);
+            return config.Apply(data);
     }
 
-    //transf elemente filtrare in randuri pentru afisare in grid
-    public List<Row> ToRows( List<IColumn<T>> columns, GridConfiguration<T>? configuration = null)
+    public async Task<List<Row>> ToRowsAsync(List<IColumn<T>> columns, GridConfiguration<T>? configuration = null)
     {
         //columns- coloanele care definesc structura gridului, nume, varsta
         //configuration- contine informatii despre coloane, filtru, ordonare
 
-        IEnumerable<T> items = GetData(configuration); //transformari
+        IEnumerable<T> items = await GetDataAsync(configuration); //transformari
 
         List<Row> rows = new List<Row>();
 

@@ -12,12 +12,6 @@ namespace DataGridLib.Export;
 //antete si celule ca string pentru csv/xml
 public static class GridExportData
 {
-    public static (IReadOnlyList<string> headers, IReadOnlyList<string[]> rows) Build<T>(GridConfiguration<T> config, GridDataSource<T> dataSource, List<IColumn<T>> columns)
-    {
-        //returnez datele complete
-        return BuildFromItems(config, dataSource, dataSource.GetData(config),columns);
-    }
-
     //metoda pentru export cu o lista de itemi data ca parametru
     public static (IReadOnlyList<string> headers, IReadOnlyList<string[]> rows) BuildFromItems<T>(GridConfiguration<T> config, GridDataSource<T> dataSource,IEnumerable<T> items, List<IColumn<T>> columns)
     {

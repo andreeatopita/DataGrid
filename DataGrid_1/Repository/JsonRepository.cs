@@ -6,10 +6,10 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AccountLib;
+using DataGridLib.Contracts;
 using DataGrid_1.Repository.Dtos.Json;
 
 namespace DataGrid_1.Repository;
-
 
 public class JsonRepository : IRepository<Student>
 {

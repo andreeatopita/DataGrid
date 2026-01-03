@@ -22,63 +22,27 @@ public class DataGrid<T>
         this.DataSource = DataSource;
         Configuration.Validate();
 
-
         //porneste de la pagina1
         //transmit acel func care citeste din config valoarea actuala a pag size
         Nav = new PageNavigation(() => Configuration.PageSize);
     }
-
-    //ia toate itemele, aplica filtru si ordonare
-    private IEnumerable<T> OrderedItems()
-    {
-        //iau randurile din datasource si aplic config( filtru, ordonare)
-        return DataSource.GetData(Configuration);
-    }
+    private async Task<IEnumerable<T>> OrderedItemsAsync() => await DataSource.GetDataAsync(Configuration);
+     //iau randurile din datasource si aplic config( filtru, ordonare)
 
     //pagina activata si setare la 1
-    public void EnablePagination(int pageSize)
-    {
-        Configuration.EnablePagination(pageSize);
-    }
-
+    public void EnablePagination(int pageSize) => Configuration.EnablePagination(pageSize);
     //dazactivez
-    public void DisablePagination()
-    {
-        Configuration.DisablePagination();
-    }
-
+    public void DisablePagination() => Configuration.DisablePagination();
     //dau enable si dupa setez la pagina pe care o zic
-    public void ChangePageSize(int pageSize)
-    {
-        EnablePagination(pageSize);
-    }
-
-    public void First()
-    {
-        Nav.FirstPage();
-    }
-
-    public void Last()
-    {
-        Nav.LastPage();
-    }
-
-    public void Next()
-    {
-        Nav.NextPage();
-    }
-
-    public void Previous()
-    {
-        Nav.PreviousPage();
-    }
-    public void GoToPage(int pageNumber)
-    {
-        Nav.GoToPageNo(pageNumber);
-    }
+    public void ChangePageSize(int pageSize) => EnablePagination(pageSize);
+    public void First() => Nav.FirstPage();
+    public void Last() => Nav.LastPage();
+    public void Next() => Nav.NextPage();
+    public void Previous() => Nav.PreviousPage();
+    public void GoToPage(int pageNumber) => Nav.GoToPageNo(pageNumber);
 
     //overload: afisez doar coloanele a caror header le dau eu ca parametru
-    public void Display(params string[] columnHeaders)
+    public async Task DisplayAsync(params string[] columnHeaders)
     {
 
         //filtrez coloanele din config dupa headerele date ca parametru
@@ -95,8 +59,8 @@ public class DataGrid<T>
             cols = Configuration.Columns //iau ista completa de coloane
                 .Where(c => columnHeaders.Contains(c.Header, StringComparer.OrdinalIgnoreCase))
                 .ToList();
-            //pastrez doar cooanele ale caror headere se regasesc in columnheaders
-            //face comparatie case insesitive
+            //pastrez doar coloanele ale caror headere se regasesc in columnheaders
+            //face comparatie case insensitive
 
             if (cols.Count == 0)
                 cols = Configuration.Columns;
@@ -104,17 +68,16 @@ public class DataGrid<T>
         //coloanele selectate
         LastDisplayedCols = cols;
 
-        Display(cols);
+        await RenderAsync(cols);
     }
 
-    //primeste lista de coloane de afisat
-    private void Display(List<IColumn<T>> cols)
+    private async Task RenderAsync(List<IColumn<T>> cols)
     {
         //pt fiecare item din items aplica,in ordine: pt # ia s.studentid si conv la string , si le pune intr un string[] si construieste un row
         //row[0] = "1", "danie","yes"... 
 
         //iau itemele ordonate si filtrate
-        IEnumerable<T> ordered = OrderedItems();
+        IEnumerable<T> ordered = (await OrderedItemsAsync()).ToList();
 
         //aici setez numarul total de iteme pt paginare
         Nav.UpdateTotalItems(ordered.Count());
@@ -125,6 +88,7 @@ public class DataGrid<T>
         //slice ul curent devine row
         //page items= cati am pe o pagina 
 
+        //items in row( sync)
         List<Row> rows = DataSource.ToRows(cols, pageItems);
 
         if (Nav.Enabled)
@@ -208,7 +172,7 @@ public class DataGrid<T>
     }
 
     //doar pagina curenta
-    public void ExportDataGrid(IGridExporter exporter)
+    public async Task ExportDataGridAsync(IGridExporter exporter)
     {
         if (exporter == null) 
             throw new ArgumentNullException("Exporter null.");
@@ -217,7 +181,8 @@ public class DataGrid<T>
         string path = Path.Combine(AppContext.BaseDirectory, $"std_export.{exporter.Extension}");
 
         //aplic where/orderby din config
-        var ordered = OrderedItems().ToList();
+        //iau datele ordonate async
+        var ordered = (await OrderedItemsAsync()).ToList();
 
         //abia dupa ordonare aplic paginarea
         var pageItems = Nav.PageSlice(ordered);
@@ -227,6 +192,7 @@ public class DataGrid<T>
         //daca am afisat anterior doar anumite coloane, le folosesc pe alea
         var visibleCol = LastDisplayedCols ?? Configuration.Columns;
 
+        //sync, lucreaza cu obiecte in memorie
         var (headers, rows) = GridExportData.BuildFromItems(Configuration, DataSource,pageItems, visibleCol);
 
         GridPage? exportPage = BuildPageExp(totalItems, rows.Count);
